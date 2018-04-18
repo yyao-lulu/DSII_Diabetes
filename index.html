@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Yangwei Yan (yy2828), Yunqiu Yao (yy2827), Boxuan Li (bl2689)" />
+
+
+<title>Data Science 2 Final Project</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="mailto:&lt;you@youremail.com&gt;">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://github.com/&lt;YOUR_GH_NAME&gt;/">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Data Science 2 Final Project</h1>
+<h4 class="author"><em>Yangwei Yan (yy2828), Yunqiu Yao (yy2827), Boxuan Li (bl2689)</em></h4>
+<h4 class="date"><em>4/18/2018</em></h4>
+
+</div>
+
+
+<pre class="r"><code>diabetes &lt;- read_csv(&#39;./data/diabetic_data.csv&#39;) %&gt;%
+  clean_names()
+
+missing &lt;- vector(length = 50)
+for (i in 1:50) {
+  diabetes[which(diabetes[,i] == &#39;?&#39;),i] &lt;- NA  # recode &#39;?&#39; to NA.
+  missing[i] &lt;- sum(is.na(diabetes[,i]))/dim(diabetes)[1]
+}
+
+# missing value proportion
+col.mis &lt;- which(missing != 0)
+rbind(colnames(diabetes)[col.mis],missing[col.mis])</code></pre>
+<pre><code>##      [,1]                 [,2]                [,3]               
+## [1,] &quot;race&quot;               &quot;weight&quot;            &quot;payer_code&quot;       
+## [2,] &quot;0.0223355541143407&quot; &quot;0.968584792563332&quot; &quot;0.395574160328597&quot;
+##      [,4]                [,5]                   [,6]                 
+## [1,] &quot;medical_specialty&quot; &quot;diag_1&quot;               &quot;diag_2&quot;             
+## [2,] &quot;0.490822082031327&quot; &quot;0.000206355757325629&quot; &quot;0.00351787433917025&quot;
+##      [,7]              
+## [1,] &quot;diag_3&quot;          
+## [2,] &quot;0.01398305917497&quot;</code></pre>
+<pre class="r"><code># Therefore, we consider to omit those variables with large number of missing values, i.e., &#39;weight&#39;, &#39;payer code&#39; and &#39;medical specialty&#39;. We further omit NA values in other variables.
+diabetes &lt;- diabetes %&gt;%
+  select(., everything(), -weight, -payer_code, -medical_specialty) %&gt;%
+  na.omit() %&gt;%
+  arrange(., patient_nbr)
+head(diabetes, 10)</code></pre>
+<pre><code>## # A tibble: 10 x 47
+##    encounter_id patient_nbr            race gender     age
+##           &lt;int&gt;       &lt;int&gt;           &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;
+##  1     24437208         135       Caucasian Female [50-60)
+##  2     26264286         135       Caucasian Female [50-60)
+##  3     29758806         378       Caucasian Female [50-60)
+##  4    189899286         729       Caucasian Female [80-90)
+##  5     64331490         774       Caucasian Female [80-90)
+##  6     14824206         927 AfricanAmerican Female [30-40)
+##  7     30180318        1152 AfricanAmerican Female [50-60)
+##  8     55533660        1152 AfricanAmerican Female [60-70)
+##  9     83281464        1152 AfricanAmerican Female [60-70)
+## 10     66197028        1305       Caucasian Female [60-70)
+## # ... with 42 more variables: admission_type_id &lt;int&gt;,
+## #   discharge_disposition_id &lt;int&gt;, admission_source_id &lt;int&gt;,
+## #   time_in_hospital &lt;int&gt;, num_lab_procedures &lt;int&gt;,
+## #   num_procedures &lt;int&gt;, num_medications &lt;int&gt;, number_outpatient &lt;int&gt;,
+## #   number_emergency &lt;int&gt;, number_inpatient &lt;int&gt;, diag_1 &lt;chr&gt;,
+## #   diag_2 &lt;chr&gt;, diag_3 &lt;chr&gt;, number_diagnoses &lt;int&gt;,
+## #   max_glu_serum &lt;chr&gt;, a1cresult &lt;chr&gt;, metformin &lt;chr&gt;,
+## #   repaglinide &lt;chr&gt;, nateglinide &lt;chr&gt;, chlorpropamide &lt;chr&gt;,
+## #   glimepiride &lt;chr&gt;, acetohexamide &lt;chr&gt;, glipizide &lt;chr&gt;,
+## #   glyburide &lt;chr&gt;, tolbutamide &lt;chr&gt;, pioglitazone &lt;chr&gt;,
+## #   rosiglitazone &lt;chr&gt;, acarbose &lt;chr&gt;, miglitol &lt;chr&gt;,
+## #   troglitazone &lt;chr&gt;, tolazamide &lt;chr&gt;, examide &lt;chr&gt;,
+## #   citoglipton &lt;chr&gt;, insulin &lt;chr&gt;, glyburide_metformin &lt;chr&gt;,
+## #   glipizide_metformin &lt;chr&gt;, glimepiride_pioglitazone &lt;chr&gt;,
+## #   metformin_rosiglitazone &lt;chr&gt;, metformin_pioglitazone &lt;chr&gt;,
+## #   change &lt;chr&gt;, diabetesmed &lt;chr&gt;, readmitted &lt;chr&gt;</code></pre>
+<pre class="r"><code>summary(diabetes)</code></pre>
+<pre><code>##   encounter_id        patient_nbr            race          
+##  Min.   :    12522   Min.   :      135   Length:98053      
+##  1st Qu.: 85285656   1st Qu.: 23502339   Class :character  
+##  Median :153301920   Median : 46877904   Mode  :character  
+##  Mean   :165829423   Mean   : 54847921                     
+##  3rd Qu.:230500710   3rd Qu.: 88003062                     
+##  Max.   :443867222   Max.   :189502619                     
+##     gender              age            admission_type_id
+##  Length:98053       Length:98053       Min.   :1.000    
+##  Class :character   Class :character   1st Qu.:1.000    
+##  Mode  :character   Mode  :character   Median :1.000    
+##                                        Mean   :2.026    
+##                                        3rd Qu.:3.000    
+##                                        Max.   :8.000    
+##  discharge_disposition_id admission_source_id time_in_hospital
+##  Min.   : 1.000           Min.   : 1.000      Min.   : 1.000  
+##  1st Qu.: 1.000           1st Qu.: 1.000      1st Qu.: 2.000  
+##  Median : 1.000           Median : 7.000      Median : 4.000  
+##  Mean   : 3.753           Mean   : 5.777      Mean   : 4.422  
+##  3rd Qu.: 4.000           3rd Qu.: 7.000      3rd Qu.: 6.000  
+##  Max.   :28.000           Max.   :25.000      Max.   :14.000  
+##  num_lab_procedures num_procedures  num_medications number_outpatient
+##  Min.   :  1.00     Min.   :0.000   Min.   : 1.00   Min.   : 0.0000  
+##  1st Qu.: 31.00     1st Qu.:0.000   1st Qu.:11.00   1st Qu.: 0.0000  
+##  Median : 44.00     Median :1.000   Median :15.00   Median : 0.0000  
+##  Mean   : 43.15     Mean   :1.351   Mean   :16.12   Mean   : 0.3764  
+##  3rd Qu.: 57.00     3rd Qu.:2.000   3rd Qu.:20.00   3rd Qu.: 0.0000  
+##  Max.   :132.00     Max.   :6.000   Max.   :81.00   Max.   :42.0000  
+##  number_emergency  number_inpatient     diag_1             diag_2         
+##  Min.   : 0.0000   Min.   : 0.0000   Length:98053       Length:98053      
+##  1st Qu.: 0.0000   1st Qu.: 0.0000   Class :character   Class :character  
+##  Median : 0.0000   Median : 0.0000   Mode  :character   Mode  :character  
+##  Mean   : 0.2025   Mean   : 0.6469                                        
+##  3rd Qu.: 0.0000   3rd Qu.: 1.0000                                        
+##  Max.   :76.0000   Max.   :21.0000                                        
+##     diag_3          number_diagnoses max_glu_serum       a1cresult        
+##  Length:98053       Min.   : 3.000   Length:98053       Length:98053      
+##  Class :character   1st Qu.: 6.000   Class :character   Class :character  
+##  Mode  :character   Median : 8.000   Mode  :character   Mode  :character  
+##                     Mean   : 7.512                                        
+##                     3rd Qu.: 9.000                                        
+##                     Max.   :16.000                                        
+##   metformin         repaglinide        nateglinide       
+##  Length:98053       Length:98053       Length:98053      
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+##                                                          
+##  chlorpropamide     glimepiride        acetohexamide     
+##  Length:98053       Length:98053       Length:98053      
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+##                                                          
+##   glipizide          glyburide         tolbutamide       
+##  Length:98053       Length:98053       Length:98053      
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+##                                                          
+##  pioglitazone       rosiglitazone        acarbose        
+##  Length:98053       Length:98053       Length:98053      
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+##                                                          
+##    miglitol         troglitazone        tolazamide       
+##  Length:98053       Length:98053       Length:98053      
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+##                                                          
+##    examide          citoglipton          insulin         
+##  Length:98053       Length:98053       Length:98053      
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+##                                                          
+##  glyburide_metformin glipizide_metformin glimepiride_pioglitazone
+##  Length:98053        Length:98053        Length:98053            
+##  Class :character    Class :character    Class :character        
+##  Mode  :character    Mode  :character    Mode  :character        
+##                                                                  
+##                                                                  
+##                                                                  
+##  metformin_rosiglitazone metformin_pioglitazone    change         
+##  Length:98053            Length:98053           Length:98053      
+##  Class :character        Class :character       Class :character  
+##  Mode  :character        Mode  :character       Mode  :character  
+##                                                                   
+##                                                                   
+##                                                                   
+##  diabetesmed         readmitted       
+##  Length:98053       Length:98053      
+##  Class :character   Class :character  
+##  Mode  :character   Mode  :character  
+##                                       
+##                                       
+## </code></pre>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
