@@ -1,0 +1,49 @@
+---
+title: "Data Science 2 Final Project"
+author: "Yangwei Yan (yy2828), Yunqiu Yao (yy2827), Boxuan Li (bl2689)"
+date: "4/18/2018"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r R set-up, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 8,
+  fig.asp = 1,
+  out.width = "90%"
+)
+
+library(MASS)
+library(tidyverse)
+library(janitor)
+
+theme_set(theme_bw())
+theme_update(legend.position = "bottom")
+```
+
+```{r dataset cleaning}
+diabetes <- read_csv('./data/diabetic_data.csv') %>%
+  clean_names()
+
+# missing value proportion
+diabetes[diabetes=="?"] = NA
+sapply(diabetes,function(x) sum(is.na(x))/dim(diabetes)[1]) %>% .[.!=0]
+
+# Therefore, we consider to omit those variables with large number of missing values, i.e., 'weight', 'payer code' and 'medical specialty'. We further omit NA values in other variables.
+diabetes <- diabetes %>%
+  select(., everything(), -weight, -payer_code, -medical_specialty) %>%
+  na.omit() %>%
+  arrange(patient_nbr) %>% 
+  group_by(patient_nbr) %>% 
+  filter(row_number(encounter_id)==1,
+         !(discharge_disposition_id %in% c(11,13,14,19:21)))
+
+head(diabetes, 10)
+
+summary(diabetes)
+
+```
