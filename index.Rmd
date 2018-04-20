@@ -29,35 +29,21 @@ theme_update(legend.position = "bottom")
 diabetes <- read_csv('./data/diabetic_data.csv') %>%
   clean_names()
 
-<<<<<<< HEAD
+
 # missing value proportion
 diabetes[diabetes=="?"] = NA
 sapply(diabetes,function(x) sum(is.na(x))/dim(diabetes)[1]) %>% .[.!=0]
-=======
-missing <- vector(length = 50)
-for (i in 1:50) {
-  diabetes[which(diabetes[,i] == '?'),i] <- NA  # recode '?' to NA.
-  missing[i] <- sum(is.na(diabetes[,i]))/dim(diabetes)[1]
-}
-
-# missing value proportion
-col.mis <- which(missing != 0)
-rbind(colnames(diabetes)[col.mis],missing[col.mis])
->>>>>>> 1e310152687d48ac6657a5830071a5cf1747108d
 
 # Therefore, we consider to omit those variables with large number of missing values, i.e., 'weight', 'payer code' and 'medical specialty'. We further omit NA values in other variables.
 diabetes <- diabetes %>%
   select(., everything(), -weight, -payer_code, -medical_specialty) %>%
   na.omit() %>%
-<<<<<<< HEAD
   arrange(patient_nbr) %>% 
   group_by(patient_nbr) %>% 
   filter(row_number(encounter_id)==1,
-         !(discharge_disposition_id %in% c(11,13,14,19:21)))
+         !(discharge_disposition_id %in% c(11,13,14,19:21))) %>% 
+  mutate(readmitted=ifelse(readmitted=="<30","<30",">30"))
 
-=======
-  arrange(., patient_nbr)
->>>>>>> 1e310152687d48ac6657a5830071a5cf1747108d
 head(diabetes, 10)
 
 summary(diabetes)
