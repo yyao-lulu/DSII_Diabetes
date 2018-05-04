@@ -22,8 +22,8 @@
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -33,10 +33,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -231,43 +233,39 @@ $(document).ready(function () {
 <pre class="r"><code>diabetes &lt;- read_csv(&#39;./data/diabetic_data.csv&#39;) %&gt;%
   clean_names()
 
-missing &lt;- vector(length = 50)
-for (i in 1:50) {
-  diabetes[which(diabetes[,i] == &#39;?&#39;),i] &lt;- NA  # recode &#39;?&#39; to NA.
-  missing[i] &lt;- sum(is.na(diabetes[,i]))/dim(diabetes)[1]
-}
 
 # missing value proportion
-col.mis &lt;- which(missing != 0)
-rbind(colnames(diabetes)[col.mis],missing[col.mis])</code></pre>
-<pre><code>##      [,1]                 [,2]                [,3]               
-## [1,] &quot;race&quot;               &quot;weight&quot;            &quot;payer_code&quot;       
-## [2,] &quot;0.0223355541143407&quot; &quot;0.968584792563332&quot; &quot;0.395574160328597&quot;
-##      [,4]                [,5]                   [,6]                 
-## [1,] &quot;medical_specialty&quot; &quot;diag_1&quot;               &quot;diag_2&quot;             
-## [2,] &quot;0.490822082031327&quot; &quot;0.000206355757325629&quot; &quot;0.00351787433917025&quot;
-##      [,7]              
-## [1,] &quot;diag_3&quot;          
-## [2,] &quot;0.01398305917497&quot;</code></pre>
+diabetes[diabetes==&quot;?&quot;] = NA
+sapply(diabetes,function(x) sum(is.na(x))/dim(diabetes)[1]) %&gt;% .[.!=0]</code></pre>
+<pre><code>##              race            weight        payer_code medical_specialty 
+##      0.0223355541      0.9685847926      0.3955741603      0.4908220820 
+##            diag_1            diag_2            diag_3 
+##      0.0002063558      0.0035178743      0.0139830592</code></pre>
 <pre class="r"><code># Therefore, we consider to omit those variables with large number of missing values, i.e., &#39;weight&#39;, &#39;payer code&#39; and &#39;medical specialty&#39;. We further omit NA values in other variables.
 diabetes &lt;- diabetes %&gt;%
   select(., everything(), -weight, -payer_code, -medical_specialty) %&gt;%
   na.omit() %&gt;%
-  arrange(., patient_nbr)
+  arrange(patient_nbr) %&gt;% 
+  group_by(patient_nbr) %&gt;% 
+  filter(row_number(encounter_id)==1,
+         !(discharge_disposition_id %in% c(11,13,14,19:21))) %&gt;% 
+  mutate(readmitted=ifelse(readmitted==&quot;&lt;30&quot;,&quot;&lt;30&quot;,&quot;&gt;30&quot;))
+
 head(diabetes, 10)</code></pre>
 <pre><code>## # A tibble: 10 x 47
+## # Groups:   patient_nbr [10]
 ##    encounter_id patient_nbr            race gender     age
 ##           &lt;int&gt;       &lt;int&gt;           &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;
 ##  1     24437208         135       Caucasian Female [50-60)
-##  2     26264286         135       Caucasian Female [50-60)
-##  3     29758806         378       Caucasian Female [50-60)
-##  4    189899286         729       Caucasian Female [80-90)
-##  5     64331490         774       Caucasian Female [80-90)
-##  6     14824206         927 AfricanAmerican Female [30-40)
-##  7     30180318        1152 AfricanAmerican Female [50-60)
-##  8     55533660        1152 AfricanAmerican Female [60-70)
-##  9     83281464        1152 AfricanAmerican Female [60-70)
-## 10     66197028        1305       Caucasian Female [60-70)
+##  2     29758806         378       Caucasian Female [50-60)
+##  3    189899286         729       Caucasian Female [80-90)
+##  4     64331490         774       Caucasian Female [80-90)
+##  5     14824206         927 AfricanAmerican Female [30-40)
+##  6     30180318        1152 AfricanAmerican Female [50-60)
+##  7     66197028        1305       Caucasian Female [60-70)
+##  8     60254142        1314       Caucasian Female [40-50)
+##  9    171414378        1629       Caucasian   Male [70-80)
+## 10     14897280        2025       Caucasian Female [70-80)
 ## # ... with 42 more variables: admission_type_id &lt;int&gt;,
 ## #   discharge_disposition_id &lt;int&gt;, admission_source_id &lt;int&gt;,
 ## #   time_in_hospital &lt;int&gt;, num_lab_procedures &lt;int&gt;,
@@ -286,110 +284,112 @@ head(diabetes, 10)</code></pre>
 ## #   change &lt;chr&gt;, diabetesmed &lt;chr&gt;, readmitted &lt;chr&gt;</code></pre>
 <pre class="r"><code>summary(diabetes)</code></pre>
 <pre><code>##   encounter_id        patient_nbr            race          
-##  Min.   :    12522   Min.   :      135   Length:98053      
-##  1st Qu.: 85285656   1st Qu.: 23502339   Class :character  
-##  Median :153301920   Median : 46877904   Mode  :character  
-##  Mean   :165829423   Mean   : 54847921                     
-##  3rd Qu.:230500710   3rd Qu.: 88003062                     
+##  Min.   :    12522   Min.   :      135   Length:67113      
+##  1st Qu.: 81712212   1st Qu.: 23463486   Class :character  
+##  Median :145257906   Median : 49895775   Mode  :character  
+##  Mean   :157261399   Mean   : 55488378                     
+##  3rd Qu.:215044164   3rd Qu.: 87946983                     
 ##  Max.   :443867222   Max.   :189502619                     
 ##     gender              age            admission_type_id
-##  Length:98053       Length:98053       Min.   :1.000    
+##  Length:67113       Length:67113       Min.   :1.000    
 ##  Class :character   Class :character   1st Qu.:1.000    
 ##  Mode  :character   Mode  :character   Median :1.000    
-##                                        Mean   :2.026    
+##                                        Mean   :2.111    
 ##                                        3rd Qu.:3.000    
 ##                                        Max.   :8.000    
 ##  discharge_disposition_id admission_source_id time_in_hospital
-##  Min.   : 1.000           Min.   : 1.000      Min.   : 1.000  
-##  1st Qu.: 1.000           1st Qu.: 1.000      1st Qu.: 2.000  
-##  Median : 1.000           Median : 7.000      Median : 4.000  
-##  Mean   : 3.753           Mean   : 5.777      Mean   : 4.422  
-##  3rd Qu.: 4.000           3rd Qu.: 7.000      3rd Qu.: 6.000  
-##  Max.   :28.000           Max.   :25.000      Max.   :14.000  
-##  num_lab_procedures num_procedures  num_medications number_outpatient
-##  Min.   :  1.00     Min.   :0.000   Min.   : 1.00   Min.   : 0.0000  
-##  1st Qu.: 31.00     1st Qu.:0.000   1st Qu.:11.00   1st Qu.: 0.0000  
-##  Median : 44.00     Median :1.000   Median :15.00   Median : 0.0000  
-##  Mean   : 43.15     Mean   :1.351   Mean   :16.12   Mean   : 0.3764  
-##  3rd Qu.: 57.00     3rd Qu.:2.000   3rd Qu.:20.00   3rd Qu.: 0.0000  
-##  Max.   :132.00     Max.   :6.000   Max.   :81.00   Max.   :42.0000  
+##  Min.   : 1.000           Min.   : 1.00       Min.   : 1.000  
+##  1st Qu.: 1.000           1st Qu.: 1.00       1st Qu.: 2.000  
+##  Median : 1.000           Median : 7.00       Median : 4.000  
+##  Mean   : 3.449           Mean   : 5.66       Mean   : 4.301  
+##  3rd Qu.: 3.000           3rd Qu.: 7.00       3rd Qu.: 6.000  
+##  Max.   :28.000           Max.   :25.00       Max.   :14.000  
+##  num_lab_procedures num_procedures num_medications number_outpatient
+##  Min.   :  1.00     Min.   :0.00   Min.   : 1.00   Min.   : 0.0000  
+##  1st Qu.: 31.00     1st Qu.:0.00   1st Qu.:10.00   1st Qu.: 0.0000  
+##  Median : 44.00     Median :1.00   Median :14.00   Median : 0.0000  
+##  Mean   : 42.92     Mean   :1.44   Mean   :15.77   Mean   : 0.2864  
+##  3rd Qu.: 57.00     3rd Qu.:2.00   3rd Qu.:20.00   3rd Qu.: 0.0000  
+##  Max.   :132.00     Max.   :6.00   Max.   :81.00   Max.   :42.0000  
 ##  number_emergency  number_inpatient     diag_1             diag_2         
-##  Min.   : 0.0000   Min.   : 0.0000   Length:98053       Length:98053      
+##  Min.   : 0.0000   Min.   : 0.0000   Length:67113       Length:67113      
 ##  1st Qu.: 0.0000   1st Qu.: 0.0000   Class :character   Class :character  
 ##  Median : 0.0000   Median : 0.0000   Mode  :character   Mode  :character  
-##  Mean   : 0.2025   Mean   : 0.6469                                        
-##  3rd Qu.: 0.0000   3rd Qu.: 1.0000                                        
-##  Max.   :76.0000   Max.   :21.0000                                        
+##  Mean   : 0.1069   Mean   : 0.1834                                        
+##  3rd Qu.: 0.0000   3rd Qu.: 0.0000                                        
+##  Max.   :42.0000   Max.   :12.0000                                        
 ##     diag_3          number_diagnoses max_glu_serum       a1cresult        
-##  Length:98053       Min.   : 3.000   Length:98053       Length:98053      
+##  Length:67113       Min.   : 3.000   Length:67113       Length:67113      
 ##  Class :character   1st Qu.: 6.000   Class :character   Class :character  
 ##  Mode  :character   Median : 8.000   Mode  :character   Mode  :character  
-##                     Mean   : 7.512                                        
+##                     Mean   : 7.325                                        
 ##                     3rd Qu.: 9.000                                        
 ##                     Max.   :16.000                                        
 ##   metformin         repaglinide        nateglinide       
-##  Length:98053       Length:98053       Length:98053      
+##  Length:67113       Length:67113       Length:67113      
 ##  Class :character   Class :character   Class :character  
 ##  Mode  :character   Mode  :character   Mode  :character  
 ##                                                          
 ##                                                          
 ##                                                          
 ##  chlorpropamide     glimepiride        acetohexamide     
-##  Length:98053       Length:98053       Length:98053      
+##  Length:67113       Length:67113       Length:67113      
 ##  Class :character   Class :character   Class :character  
 ##  Mode  :character   Mode  :character   Mode  :character  
 ##                                                          
 ##                                                          
 ##                                                          
 ##   glipizide          glyburide         tolbutamide       
-##  Length:98053       Length:98053       Length:98053      
+##  Length:67113       Length:67113       Length:67113      
 ##  Class :character   Class :character   Class :character  
 ##  Mode  :character   Mode  :character   Mode  :character  
 ##                                                          
 ##                                                          
 ##                                                          
 ##  pioglitazone       rosiglitazone        acarbose        
-##  Length:98053       Length:98053       Length:98053      
+##  Length:67113       Length:67113       Length:67113      
 ##  Class :character   Class :character   Class :character  
 ##  Mode  :character   Mode  :character   Mode  :character  
 ##                                                          
 ##                                                          
 ##                                                          
 ##    miglitol         troglitazone        tolazamide       
-##  Length:98053       Length:98053       Length:98053      
+##  Length:67113       Length:67113       Length:67113      
 ##  Class :character   Class :character   Class :character  
 ##  Mode  :character   Mode  :character   Mode  :character  
 ##                                                          
 ##                                                          
 ##                                                          
 ##    examide          citoglipton          insulin         
-##  Length:98053       Length:98053       Length:98053      
+##  Length:67113       Length:67113       Length:67113      
 ##  Class :character   Class :character   Class :character  
 ##  Mode  :character   Mode  :character   Mode  :character  
 ##                                                          
 ##                                                          
 ##                                                          
 ##  glyburide_metformin glipizide_metformin glimepiride_pioglitazone
-##  Length:98053        Length:98053        Length:98053            
+##  Length:67113        Length:67113        Length:67113            
 ##  Class :character    Class :character    Class :character        
 ##  Mode  :character    Mode  :character    Mode  :character        
 ##                                                                  
 ##                                                                  
 ##                                                                  
 ##  metformin_rosiglitazone metformin_pioglitazone    change         
-##  Length:98053            Length:98053           Length:98053      
+##  Length:67113            Length:67113           Length:67113      
 ##  Class :character        Class :character       Class :character  
 ##  Mode  :character        Mode  :character       Mode  :character  
 ##                                                                   
 ##                                                                   
 ##                                                                   
 ##  diabetesmed         readmitted       
-##  Length:98053       Length:98053      
+##  Length:67113       Length:67113      
 ##  Class :character   Class :character  
 ##  Mode  :character   Mode  :character  
 ##                                       
 ##                                       
 ## </code></pre>
+<p>The dataset used in this study was extracted from the Health Facts database (Cerner Corporation, Kansas City, MO), a national data warehouse that collects comprehensive clinical records across hospitals throughout the United States. Information in the dataset was systematically collected from participating institutions electronic medical records. In this case, we focus on the records on “diabetic” encounters. The dataset contains 67113 observations and 47 variables after data cleaning. Specifically, it incorporates basic information on each “diabetic” encounter for patients, including several demographic characteristics (i.e., “race”, “gender” and “age”), hospital records about diagnosis, medical treatments, and th readmission status for each patient. Most of variables in the dataset are categorical, with two or three categories (e.g., “Yes”, “No”, “Steady”, etc.), indicating whether the patient received some treatments or had some particular features. Information in this dataset can be helpful to evaluate the efficacy of different treatments to reduce the readmission rate of patients due to diabetes. Therefore, the “readmitted” variable is regarded as the main response in the supervised analysis section, which will aim to explore the impact of different treatments to the readmission due to diaebtes. Result of this research is promising to provide some insights in improvement of the diabetes treatment.</p>
+<p>During the data cleaning process, we omitted the variables with too many missing values, i.e., ‘weight’, ‘payer code’ and ‘medical specialty’. Subsequently, few missing values left in other variables were omiited as well. In addtion, we combine “No” and “&gt;30” categories in the “readmitted” variable into “&gt;30” category because it has been verified by research that it is more likely for a patient to readmit after 30 days due to his or her own healthy issues instead of the treatment. Therefore, only readmission within 30 days after discharge is considered to be associated with the treatment in this case, which is why three categories were combined into two indicating readmission related to treatment and readmission irrelevant to treatment respectively.</p>
 
 
 
