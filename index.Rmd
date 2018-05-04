@@ -43,7 +43,7 @@ diabetes <- diabetes %>%
   filter(row_number(encounter_id)==1,
          !(discharge_disposition_id %in% c(11,13,14,19:21))) %>% 
 # Classify the readmitted status into “Yes” if the patient was readmitted in less than 30 days and “No” if the patient was readmitted in more than 30 days or no record of readmission. 
-  mutate(readmitted=ifelse(readmitted=="Yes","<30","No"))
+  mutate(readmitted=ifelse(readmitted=="<30","Yes","No"))
 # Specify the variable "Diagnosis" as the correspnding diagnosed diseases
 diabetes_tidy = diabetes %>% 
   mutate(
@@ -92,8 +92,16 @@ The dataset used in this study was extracted from the Health Facts database (Cer
 During the data cleaning process, we omitted the variables with too many missing values, i.e., 'weight', 'payer code' and 'medical specialty'. Subsequently, few missing values left in other variables were omiited as well. In addtion, we combine "No" and ">30" categories in the "readmitted" variable into ">30" category because it has been verified by research that it is more likely for a patient to readmit after 30 days due to his or her own healthy issues instead of the treatment. Therefore, only readmission within 30 days after discharge is considered to be associated with the treatment in this case, which is why three categories were combined into two indicating readmission related to treatment and readmission irrelevant to treatment respectively. 
 
 
-```{r supervised learning}
+```{r training and test data}
+# create training set
+diabetes_tidy = diabetes_tidy %>% mutate(readmitted = as.factor(readmitted))
+set.seed(1)
+train = sample(1:nrow(diabetes_tidy), 60000)
 
+set.seed(1)
+library(randomForest)
+fit_rf = randomForest(readmitted~., data = diabetes_tidy, subset = train, mtry = 7, importance = TRUE)
+importance(fit_rf)
 ```
 
 
