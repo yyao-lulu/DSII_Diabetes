@@ -29,7 +29,6 @@ theme_update(legend.position = "bottom")
 diabetes <- read_csv('./data/diabetic_data.csv') %>%
   clean_names()
 
-
 # missing value proportion
 diabetes[diabetes=="?"] = NA
 sapply(diabetes,function(x) sum(is.na(x))/dim(diabetes)[1]) %>% .[.!=0]
@@ -84,7 +83,6 @@ diabetes_tidy = diabetes_tidy %>%
 head(diabetes_tidy, 10)
 
 summary(diabetes_tidy) # most of the character variables are not summarized
-
 ```
 
 The dataset used in this study was extracted from the Health Facts database (Cerner Corporation, Kansas City, MO), a national data warehouse that collects comprehensive clinical records across hospitals throughout the United States. Information in the dataset was systematically collected from participating institutions electronic medical records. In this case, we focus on the records on "diabetic" encounters. The dataset contains `r nrow(diabetes)` observations and `r ncol(diabetes)` variables after data cleaning. Specifically, it incorporates basic information on each "diabetic" encounter for patients, including several demographic characteristics (i.e., "race", "gender" and "age"), hospital records about diagnosis, medical treatments, and th readmission status for each patient. Most of variables in the dataset are categorical, with two or three categories (e.g., "Yes", "No", "Steady", etc.), indicating whether the patient received some treatments or had some particular features. Information in this dataset can be helpful to evaluate the efficacy of different treatments to reduce the readmission rate of patients due to diabetes. Therefore, the "readmitted" variable is regarded as the main response in the supervised analysis section, which will aim to explore the impact of different treatments to the readmission due to diaebtes. Result of this research is promising to provide some insights in improvement of the diabetes treatment. 
@@ -94,13 +92,16 @@ During the data cleaning process, we omitted the variables with too many missing
 
 ```{r training and test data}
 # create training set
-diabetes_tidy = diabetes_tidy %>% mutate(readmitted = as.factor(readmitted))
 set.seed(1)
 train = sample(1:nrow(diabetes_tidy), 60000)
 
 set.seed(1)
 library(randomForest)
-fit_rf = randomForest(readmitted~., data = diabetes_tidy, subset = train, mtry = 7, importance = TRUE)
+diabetes_rf <- mutate(diabetes_tidy, readmitted = ifelse(readmitted=='Yes', 1,0)) %>%
+  ungroup() %>%
+  mutate_if(is.character, as.factor)
+
+fit_rf = randomForest(readmitted~., data = diabetes_rf, subset = train, mtry = 7, importance = TRUE)
 importance(fit_rf)
 ```
 
