@@ -81,6 +81,8 @@ diabetes_tidy = diabetes_tidy %>%
   select(-admission_type_id, -discharge_disposition_id, -c(chlorpropamide,acetohexamide,tolbutamide,miglitol,troglitazone,tolazamide,examide,citoglipton,glipizide_metformin,glimepiride_pioglitazone,metformin_rosiglitazone,metformin_pioglitazone)) %>%
   mutate_if(is.character, as.factor)
 
+rsample = sample(1:nrow(diabetes_tidy), 20000)
+diabetes_tidy = diabetes_tidy[rsample, ]
 
 head(diabetes_tidy, 10)
 
@@ -92,10 +94,26 @@ The dataset used in this study was extracted from the Health Facts database (Cer
 During the data cleaning process, we omitted the variables with too many missing values, i.e., 'weight', 'payer code' and 'medical specialty'. Subsequently, few missing values left in other variables were omiited as well. In addtion, we combine "No" and ">30" categories in the "readmitted" variable into ">30" category because it has been verified by research that it is more likely for a patient to readmit after 30 days due to his or her own healthy issues instead of the treatment. Therefore, only readmission within 30 days after discharge is considered to be associated with the treatment in this case, which is why three categories were combined into two indicating readmission related to treatment and readmission irrelevant to treatment respectively. 
 
 
-```{r training and test data}
+```{r KNN}
 # create training set
 set.seed(1)
-train = sample(1:nrow(diabetes_tidy), 30000)
+train_sample = sample(1:nrow(diabetes_tidy), 10000)
+readmit = diabetes_tidy[train_sample,]$readmitted
+train = diabetes_tidy[train_sample, c(7:13, 17)]
+test = diabetes_tidy[-train_sample, c(7:13, 17)]
+
+set.seed(1)
+library(class)
+fit_knn = knn(train, test, cl = readmit, k = 10)
+library(caret)
+confusionMatrix(fit_knn, diabetes_tidy[-train_sample,]$readmitted)
+```
+
+
+```{r randomforest}
+# create training set
+set.seed(1)
+train = sample(1:nrow(diabetes_tidy), 10000)
 
 set.seed(1)
 library(randomForest)
