@@ -80,39 +80,50 @@ diabetes_tidy = diabetes_tidy %>%
     admission_source = ifelse(admission_source_id==7, "Emergency",
                   ifelse(admission_source_id %in% 1:3, "Referral", "Other"))
   ) %>% 
-  select(-admission_type_id, -discharge_disposition_id, -c(chlorpropamide,acetohexamide,tolbutamide,miglitol,troglitazone,tolazamide,examide,citoglipton,glipizide_metformin,glimepiride_pioglitazone,metformin_rosiglitazone,metformin_pioglitazone)) %>%
+  select(-admission_type_id, -admission_source_id, -discharge_disposition_id, -c(chlorpropamide,acetohexamide,tolbutamide,miglitol,troglitazone,tolazamide,examide,citoglipton,glipizide_metformin,glimepiride_pioglitazone,metformin_rosiglitazone,metformin_pioglitazone)) %>%
   mutate_if(is.character, as.factor)
-
-rsample = sample(1:nrow(diabetes_tidy), 20000)
-diabetes_tidy = diabetes_tidy[rsample, ]
-
-head(diabetes_tidy, 10)
 ```
 
 ## Data Description
 The dataset used in this study was extracted from the Health Facts database (Cerner Corporation, Kansas City, MO), a national data warehouse that collects comprehensive clinical records across hospitals throughout the United States. Information in the dataset was systematically collected from participating institutions electronic medical records. In this case, we focus on the records on "diabetic" encounters. The dataset contains `r nrow(diabetes)` observations and `r ncol(diabetes)` variables before data cleaning. Specifically, it incorporates basic information on each "diabetic" encounter for patients, including several demographic characteristics (i.e., "race", "gender" and "age"), hospital records about diagnosis, medical treatments, and th readmission status for each patient. Most of variables in the dataset are categorical, with two or three categories (e.g., "Yes", "No", "Steady", etc.), indicating whether the patient received some treatments or had some particular features. Information in this dataset can be helpful to evaluate the efficacy of different treatments to reduce the readmission rate of patients due to diabetes. Therefore, the "readmitted" variable is regarded as the main response in the supervised analysis section, which will aim to explore the impact of different treatments to the readmission due to diaebtes. Result of this research is promising to provide some insights in improvement of the diabetes treatment. 
 
-During the data cleaning process, we omitted the variables with too many missing values with the proportion of missing values over 50%, i.e., 'weight', 'payer code' and 'medical specialty'. Subsequently, few missing values left in other variables were omiited as well. In addtion, we combined "No" and ">30" categories in the "readmitted" variable into ">30" category because it has been verified by research that it is more likely for a patient to readmit after 30 days due to his or her own healthy issues instead of the treatment. Therefore, only readmission within 30 days after discharge was considered to be associated with the treatment in this case, which is why three categories were combined into two indicating readmission related to treatment and readmission irrelevant to treatment respectively. In terms of those numeric variables referring to categorical meanings such as "diag_1", "diag_2", "diag_3" and "discharge", we substituted them with the original implications as factors. Futhermore, multiple variables were found to give extremely separate categories, i.e., the ratio of two categories is less than (!!!!!), thus they were also removed and will not be considered in further analyses. Simultaneously, considering the overwhelming data that could cause difficulty in techinics used in supervised analysis, we decided to appropriately reduce the size to 20000 observations randomly.  After the process of data cleaning, the dataset still contains `r nrow(diabetes_tidy)` observations and `r ncol(diabetes_tidy)` variables.
+During the data cleaning process, we omitted the variables with too many missing values with the proportion of missing values over 50%, i.e., 'weight', 'payer code' and 'medical specialty'. Subsequently, few missing values left in other variables were omiited as well. Data in the original dataset are considered to be correlated because it contained multiple visits per patients. Thus we used only the first encounter for each patient as the primary admission status. In addtion, we combined "No" and ">30" categories in the "readmitted" variable into ">30" category because it has been verified by research that it is more likely for a patient to readmit after 30 days due to his or her own healthy issues instead of the treatment. Therefore, only readmission within 30 days after discharge was considered to be associated with the treatment in this case, which is why three categories were combined into two indicating readmission related to treatment and readmission irrelevant to treatment respectively. In terms of those numeric variables referring to categorical meanings such as "diag_1", "diag_2", "diag_3" and "discharge", we substituted them with the original implications as factors. Futhermore, multiple variables were found to give extremely separate categories, i.e., the ratio of two categories is less than 0.1%, thus they were also removed and will not be considered in further analyses. Simultaneously, considering the overwhelming data that could cause difficulty in techinics used in supervised analysis, we decided to appropriately reduce the size to 20000 observations randomly.  After the process of data cleaning, the dataset still contains `r nrow(diabetes_tidy)` observations and `r ncol(diabetes_tidy)` variables.
 
 More detailed information can be found in [here](ref:).
 
 ## Explanatory Data Analysis
 ```{r}
 summary(diabetes_tidy) #!!!!!! back to the original dataset?
+
+rsample = sample(1:nrow(diabetes_tidy), 20000)
+diabetes_tidy = diabetes_tidy[rsample, ]
 ```
 
 The summary and the table presents an basic but comprehensive overview of the dataset, including the class of each variable, the proportion in the population for categorical variables and the related statitics for numeric variables. Based on the table, (!!!!!!).
 
 
 ## Supervised Analysis
-```{r KNN}
+
+Classification techniques including logistic regression, k-nearest neighbor classifiers, tree-based methods and support vector machines were applied to predict whether a patient would be readmitted in 30 days. By comparing the performance of different techniques, we explored the association between readmission and potential predictors, and compared the prediction accuracy of each technique. 
+
+```{r training set}
 # create training set
 set.seed(1)
 train_sample = sample(1:nrow(diabetes_tidy), 10000)
-readmit = diabetes_tidy[train_sample,]$readmitted
-train = diabetes_tidy[train_sample, c(7:13, 17)]
-test = diabetes_tidy[-train_sample, c(7:13, 17)]
+```
 
+#### Logistic Model
+
+#### K-nearest neighbor (KNN) classifiers
+K-nearest neighbor (KNN) classifiers is one of the model-free classification methods. KNN requires no assumption on the distrbution that generate the data. Thus we applied KNN in our dataset with large amounts of predictors. Since KNN measures the nearest distance between training points and the point $x_0$ to predict, it is impossible to evaluate the distance if the predictor $x_i$ is categorical. For example, it is not rationale to measure the distance between $x_0$ and "female" or $x_0$ and "male". Therefore, we only included numerical predictors to construct the KNN model.
+
+```{r KNN}
+# training and test set for knn
+readmit = diabetes_tidy[train_sample,]$readmitted
+train = as.data.frame(diabetes_tidy[train_sample, c(6:12, 16)])
+test = diabetes_tidy[-train_sample, c(6:12, 16)]
+
+# perform KNN
 set.seed(1)
 library(class)
 fit_knn = knn(train, test, cl = readmit, k = 10)
@@ -120,20 +131,29 @@ library(caret)
 confusionMatrix(fit_knn, diabetes_tidy[-train_sample,]$readmitted)
 ```
 
-
-```{r randomforest}
-# create training set
+#### Classification Tree
+We fitted a classification tree to the training data and used cross-validation on the training set to determine the optimal tree size by chosing the optimal parameter cp.
+```{r classification tree}
 set.seed(1)
-train = sample(1:nrow(diabetes_tidy), 10000)
+fit_tree = train(diabetes_tidy[-32], diabetes_tidy$readmitted, 
+                   method = "rpart",
+                   trControl = trainControl(method = "cv", number = 10))
+plot(fit_tree)
+pred_tree = predict(fit_tree, newdata = diabetes_tidy[-train_sample,])
+confusionMatrix(pred_tree, diabetes_tidy[-train_sample,]$readmitted)
+```
 
+#### Random Forest
+```{r randomforest}
 set.seed(1)
 library(randomForest)
-diabetes_rf <- mutate(diabetes_tidy, readmitted = ifelse(readmitted=='Yes', 1,0)) %>%
+diabetes_rf <- mutate(diabetes_tidy, readmitted = ifelse(readmitted =='Yes', 1,0)) %>%
   ungroup() %>%
   mutate_if(is.character, as.factor)
 
-fit_rf = randomForest(readmitted~., data = diabetes_rf, subset = train, mtry = 6, importance = TRUE)
+fit_rf = randomForest(readmitted~., data = diabetes_rf, subset = train_sample, mtry = 6, importance = TRUE)
 importance(fit_rf)
 predict()
 ```
 
+#### Support Vector Machines
