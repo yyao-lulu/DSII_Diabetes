@@ -93,7 +93,7 @@ More detailed information can be found in [here](ref:).
 
 ## Explanatory Data Analysis
 ```{r}
-summary(diabetes_tidy) #!!!!!! back to the original dataset?
+summary(diabetes_tidy) 
 
 rsample = sample(1:nrow(diabetes_tidy), 20000)
 diabetes_tidy = diabetes_tidy[rsample, ]
@@ -153,7 +153,8 @@ diabetes_rf <- mutate(diabetes_tidy, readmitted = ifelse(readmitted =='Yes', 1,0
 
 fit_rf = randomForest(readmitted~., data = diabetes_rf, subset = train_sample, mtry = 6, importance = TRUE)
 importance(fit_rf)
-predict()
+pred_rf = predict(fit_rf, newdata = diabetes_tidy[-train_sample,])
+confusionMatrix(pred_rf, diabetes_tidy[-train_sample,]$readmitted)
 ```
 
 #### Support Vector Machines
