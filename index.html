@@ -22,8 +22,8 @@
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
-<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -33,12 +33,10 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs) {
-  hljs.configure({languages: []});
-  hljs.initHighlightingOnLoad();
-  if (document.readyState && document.readyState === "complete") {
-    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
-  }
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
 }
 </script>
 
@@ -230,9 +228,9 @@ $(document).ready(function () {
 </div>
 
 
+<p>In real life, it is very important to know if a patient will be readmitted in some hospital due to some particular diseases. It is not only because readmission indicates that the patient needs to suffer more from the disease, also a potential reminder that the treatment used previously to treat the patient is not effective enough for the hospital. Generally, readmission should be avoided, which is the major motivation for this study. In this case, a dataset about the readmission status of patients with diabetes extracted from the hospital records, including information on the patient’s demographic characteristics, the diagnosis and treatment, is analyzed to explore the impact of those features on the incidence of readmission in the population. This report includes the data description, explanatory study and supervised analysis, which serve to provide sense of the data and relationship among variables in whole. The result shows that there is assication between serveral covatiates and the readmission occurrence, e.g., (!!!!!!!!!!!!!!!!!).</p>
 <pre class="r"><code>diabetes &lt;- read_csv(&#39;./data/diabetic_data.csv&#39;) %&gt;%
   clean_names()
-
 
 # missing value proportion
 diabetes[diabetes==&quot;?&quot;] = NA
@@ -249,61 +247,70 @@ diabetes &lt;- diabetes %&gt;%
   group_by(patient_nbr) %&gt;% 
   filter(row_number(encounter_id)==1,
          !(discharge_disposition_id %in% c(11,13,14,19:21))) %&gt;% 
-  mutate(readmitted=ifelse(readmitted==&quot;&lt;30&quot;,&quot;&lt;30&quot;,&quot;&gt;30&quot;))
-
-head(diabetes, 10)</code></pre>
-<pre><code>## # A tibble: 10 x 47
-## # Groups:   patient_nbr [10]
-##    encounter_id patient_nbr            race gender     age
-##           &lt;int&gt;       &lt;int&gt;           &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;
-##  1     24437208         135       Caucasian Female [50-60)
-##  2     29758806         378       Caucasian Female [50-60)
-##  3    189899286         729       Caucasian Female [80-90)
-##  4     64331490         774       Caucasian Female [80-90)
-##  5     14824206         927 AfricanAmerican Female [30-40)
-##  6     30180318        1152 AfricanAmerican Female [50-60)
-##  7     66197028        1305       Caucasian Female [60-70)
-##  8     60254142        1314       Caucasian Female [40-50)
-##  9    171414378        1629       Caucasian   Male [70-80)
-## 10     14897280        2025       Caucasian Female [70-80)
-## # ... with 42 more variables: admission_type_id &lt;int&gt;,
-## #   discharge_disposition_id &lt;int&gt;, admission_source_id &lt;int&gt;,
-## #   time_in_hospital &lt;int&gt;, num_lab_procedures &lt;int&gt;,
-## #   num_procedures &lt;int&gt;, num_medications &lt;int&gt;, number_outpatient &lt;int&gt;,
-## #   number_emergency &lt;int&gt;, number_inpatient &lt;int&gt;, diag_1 &lt;chr&gt;,
-## #   diag_2 &lt;chr&gt;, diag_3 &lt;chr&gt;, number_diagnoses &lt;int&gt;,
-## #   max_glu_serum &lt;chr&gt;, a1cresult &lt;chr&gt;, metformin &lt;chr&gt;,
-## #   repaglinide &lt;chr&gt;, nateglinide &lt;chr&gt;, chlorpropamide &lt;chr&gt;,
-## #   glimepiride &lt;chr&gt;, acetohexamide &lt;chr&gt;, glipizide &lt;chr&gt;,
-## #   glyburide &lt;chr&gt;, tolbutamide &lt;chr&gt;, pioglitazone &lt;chr&gt;,
-## #   rosiglitazone &lt;chr&gt;, acarbose &lt;chr&gt;, miglitol &lt;chr&gt;,
-## #   troglitazone &lt;chr&gt;, tolazamide &lt;chr&gt;, examide &lt;chr&gt;,
-## #   citoglipton &lt;chr&gt;, insulin &lt;chr&gt;, glyburide_metformin &lt;chr&gt;,
-## #   glipizide_metformin &lt;chr&gt;, glimepiride_pioglitazone &lt;chr&gt;,
-## #   metformin_rosiglitazone &lt;chr&gt;, metformin_pioglitazone &lt;chr&gt;,
-## #   change &lt;chr&gt;, diabetesmed &lt;chr&gt;, readmitted &lt;chr&gt;</code></pre>
-<pre class="r"><code>summary(diabetes)</code></pre>
-<pre><code>##   encounter_id        patient_nbr            race          
-##  Min.   :    12522   Min.   :      135   Length:67113      
-##  1st Qu.: 81712212   1st Qu.: 23463486   Class :character  
-##  Median :145257906   Median : 49895775   Mode  :character  
-##  Mean   :157261399   Mean   : 55488378                     
-##  3rd Qu.:215044164   3rd Qu.: 87946983                     
-##  Max.   :443867222   Max.   :189502619                     
-##     gender              age            admission_type_id
-##  Length:67113       Length:67113       Min.   :1.000    
-##  Class :character   Class :character   1st Qu.:1.000    
-##  Mode  :character   Mode  :character   Median :1.000    
-##                                        Mean   :2.111    
-##                                        3rd Qu.:3.000    
-##                                        Max.   :8.000    
-##  discharge_disposition_id admission_source_id time_in_hospital
-##  Min.   : 1.000           Min.   : 1.00       Min.   : 1.000  
-##  1st Qu.: 1.000           1st Qu.: 1.00       1st Qu.: 2.000  
-##  Median : 1.000           Median : 7.00       Median : 4.000  
-##  Mean   : 3.449           Mean   : 5.66       Mean   : 4.301  
-##  3rd Qu.: 3.000           3rd Qu.: 7.00       3rd Qu.: 6.000  
-##  Max.   :28.000           Max.   :25.00       Max.   :14.000  
+# Classify the readmitted status into “Yes” if the patient was readmitted in less than 30 days and “No” if the patient was readmitted in more than 30 days or no record of readmission. 
+  ungroup() %&gt;% 
+  mutate(readmitted=ifelse(readmitted==&quot;&lt;30&quot;,&quot;Yes&quot;,&quot;No&quot;))
+# Specify the variable &quot;Diagnosis&quot; as the correspnding diagnosed diseases
+diabetes_tidy = diabetes %&gt;% 
+  mutate(
+    diag_1=ifelse(diag_1&gt;=390 &amp; diag_1 &lt;= 459 | diag_1 == 785, &quot;Circulatory&quot;, 
+                  ifelse(diag_1&gt;=460 &amp; diag_1 &lt;= 519 | diag_1 == 786, &quot;Respiratory&quot;, 
+                  ifelse(diag_1&gt;=520 &amp; diag_1 &lt;= 579 | diag_1 == 787, &quot;Digestive&quot;,
+                  ifelse(substr(diag_1, 1, 3) == 250, &quot;Diabetes&quot;, 
+                  ifelse(diag_1&gt;=800 &amp; diag_1 &lt;= 999, &quot;Injury&quot;,
+                  ifelse(diag_1&gt;=710 &amp; diag_1 &lt;= 739, &quot;Musculoskeletal&quot;,
+                  ifelse(diag_1&gt;=580 &amp; diag_1 &lt;= 629 | diag_1 == 788, &quot;Genitourinary&quot;,
+                  ifelse(diag_1&gt;=140 &amp; diag_1 &lt;= 239, &quot;Neoplasms&quot;, &quot;Other&quot;)))))))),
+    diag_2=ifelse(diag_2&gt;=390 &amp; diag_2 &lt;= 459 | diag_2 == 785, &quot;Circulatory&quot;, 
+                  ifelse(diag_2&gt;=460 &amp; diag_2 &lt;= 519 | diag_2 == 786, &quot;Respiratory&quot;, 
+                  ifelse(diag_2&gt;=520 &amp; diag_2 &lt;= 579 | diag_2 == 787, &quot;Digestive&quot;,
+                  ifelse(substr(diag_2, 1, 3) == 250, &quot;Diabetes&quot;, 
+                  ifelse(diag_2&gt;=800 &amp; diag_2 &lt;= 999, &quot;Injury&quot;,
+                  ifelse(diag_2&gt;=710 &amp; diag_2 &lt;= 739, &quot;Musculoskeletal&quot;,
+                  ifelse(diag_2&gt;=580 &amp; diag_2 &lt;= 629 | diag_2 == 788, &quot;Genitourinary&quot;,
+                  ifelse(diag_2&gt;=140 &amp; diag_2 &lt;= 239, &quot;Neoplasms&quot;, &quot;Other&quot;)))))))),
+    diag_3=ifelse(diag_3&gt;=390 &amp; diag_3 &lt;= 459 | diag_3 == 785, &quot;Circulatory&quot;, 
+                  ifelse(diag_3&gt;=460 &amp; diag_3 &lt;= 519 | diag_3 == 786, &quot;Respiratory&quot;, 
+                  ifelse(diag_3&gt;=520 &amp; diag_3 &lt;= 579 | diag_3 == 787, &quot;Digestive&quot;,
+                  ifelse(substr(diag_3, 1, 3) == 250, &quot;Diabetes&quot;, 
+                  ifelse(diag_3&gt;=800 &amp; diag_3 &lt;= 999, &quot;Injury&quot;,
+                  ifelse(diag_3&gt;=710 &amp; diag_3 &lt;= 739, &quot;Musculoskeletal&quot;,
+                  ifelse(diag_3&gt;=580 &amp; diag_3 &lt;= 629 | diag_3 == 788, &quot;Genitourinary&quot;,
+                  ifelse(diag_3&gt;=140 &amp; diag_3 &lt;= 239, &quot;Neoplasms&quot;, &quot;Other&quot;)))))))),
+  ) 
+diabetes_tidy = diabetes_tidy %&gt;% 
+  mutate(
+    discharge = ifelse(discharge_disposition_id==1, &quot;Home&quot;, &quot;Other&quot;),
+    admission_source = ifelse(admission_source_id==7, &quot;Emergency&quot;,
+                  ifelse(admission_source_id %in% 1:3, &quot;Referral&quot;, &quot;Other&quot;))
+  ) %&gt;% 
+  select(-admission_type_id, -admission_source_id, -discharge_disposition_id, -c(chlorpropamide,acetohexamide,tolbutamide,miglitol,troglitazone,tolazamide,examide,citoglipton,glipizide_metformin,glimepiride_pioglitazone,metformin_rosiglitazone,metformin_pioglitazone)) %&gt;%
+  mutate_if(is.character, as.factor)</code></pre>
+<div id="data-description" class="section level2">
+<h2>Data Description</h2>
+<p>The dataset used in this study was extracted from the Health Facts database (Cerner Corporation, Kansas City, MO), a national data warehouse that collects comprehensive clinical records across hospitals throughout the United States. Information in the dataset was systematically collected from participating institutions electronic medical records. In this case, we focus on the records on “diabetic” encounters. The dataset contains 67113 observations and 47 variables before data cleaning. Specifically, it incorporates basic information on each “diabetic” encounter for patients, including several demographic characteristics (i.e., “race”, “gender” and “age”), hospital records about diagnosis, medical treatments, and th readmission status for each patient. Most of variables in the dataset are categorical, with two or three categories (e.g., “Yes”, “No”, “Steady”, etc.), indicating whether the patient received some treatments or had some particular features. Information in this dataset can be helpful to evaluate the efficacy of different treatments to reduce the readmission rate of patients due to diabetes. Therefore, the “readmitted” variable is regarded as the main response in the supervised analysis section, which will aim to explore the impact of different treatments to the readmission due to diaebtes. Result of this research is promising to provide some insights in improvement of the diabetes treatment.</p>
+<p>During the data cleaning process, we omitted the variables with too many missing values with the proportion of missing values over 50%, i.e., ‘weight’, ‘payer code’ and ‘medical specialty’. Subsequently, few missing values left in other variables were omiited as well. Data in the original dataset are considered to be correlated because it contained multiple visits per patients. Thus we used only the first encounter for each patient as the primary admission status. In addtion, we combined “No” and “&gt;30” categories in the “readmitted” variable into “&gt;30” category because it has been verified by research that it is more likely for a patient to readmit after 30 days due to his or her own healthy issues instead of the treatment. Therefore, only readmission within 30 days after discharge was considered to be associated with the treatment in this case, which is why three categories were combined into two indicating readmission related to treatment and readmission irrelevant to treatment respectively. In terms of those numeric variables referring to categorical meanings such as “diag_1”, “diag_2”, “diag_3” and “discharge”, we substituted them with the original implications as factors. Futhermore, multiple variables were found to give extremely separate categories, i.e., the ratio of two categories is less than 0.1%, thus they were also removed and will not be considered in further analyses. Simultaneously, considering the overwhelming data that could cause difficulty in techinics used in supervised analysis, we decided to appropriately reduce the size to 20000 observations randomly. After the process of data cleaning, the dataset still contains 67113 observations and 34 variables.</p>
+<p>More detailed information can be found in <a href="ref:">here</a>.</p>
+</div>
+<div id="explanatory-data-analysis" class="section level2">
+<h2>Explanatory Data Analysis</h2>
+<pre class="r"><code>summary(diabetes_tidy) </code></pre>
+<pre><code>##   encounter_id        patient_nbr                     race      
+##  Min.   :    12522   Min.   :      135   AfricanAmerican:12403  
+##  1st Qu.: 81712212   1st Qu.: 23463486   Asian          :  477  
+##  Median :145257906   Median : 49895775   Caucasian      :51640  
+##  Mean   :157261399   Mean   : 55488378   Hispanic       : 1460  
+##  3rd Qu.:215044164   3rd Qu.: 87946983   Other          : 1133  
+##  Max.   :443867222   Max.   :189502619                          
+##                                                                 
+##              gender           age        time_in_hospital
+##  Female         :35798   [70-80):17192   Min.   : 1.000  
+##  Male           :31314   [60-70):15145   1st Qu.: 2.000  
+##  Unknown/Invalid:    1   [50-60):11884   Median : 4.000  
+##                          [80-90):10765   Mean   : 4.301  
+##                          [40-50): 6482   3rd Qu.: 6.000  
+##                          [30-40): 2519   Max.   :14.000  
+##                          (Other): 3126                   
 ##  num_lab_procedures num_procedures num_medications number_outpatient
 ##  Min.   :  1.00     Min.   :0.00   Min.   : 1.00   Min.   : 0.0000  
 ##  1st Qu.: 31.00     1st Qu.:0.00   1st Qu.:10.00   1st Qu.: 0.0000  
@@ -311,85 +318,270 @@ head(diabetes, 10)</code></pre>
 ##  Mean   : 42.92     Mean   :1.44   Mean   :15.77   Mean   : 0.2864  
 ##  3rd Qu.: 57.00     3rd Qu.:2.00   3rd Qu.:20.00   3rd Qu.: 0.0000  
 ##  Max.   :132.00     Max.   :6.00   Max.   :81.00   Max.   :42.0000  
-##  number_emergency  number_inpatient     diag_1             diag_2         
-##  Min.   : 0.0000   Min.   : 0.0000   Length:67113       Length:67113      
-##  1st Qu.: 0.0000   1st Qu.: 0.0000   Class :character   Class :character  
-##  Median : 0.0000   Median : 0.0000   Mode  :character   Mode  :character  
-##  Mean   : 0.1069   Mean   : 0.1834                                        
-##  3rd Qu.: 0.0000   3rd Qu.: 0.0000                                        
-##  Max.   :42.0000   Max.   :12.0000                                        
-##     diag_3          number_diagnoses max_glu_serum       a1cresult        
-##  Length:67113       Min.   : 3.000   Length:67113       Length:67113      
-##  Class :character   1st Qu.: 6.000   Class :character   Class :character  
-##  Mode  :character   Median : 8.000   Mode  :character   Mode  :character  
-##                     Mean   : 7.325                                        
-##                     3rd Qu.: 9.000                                        
-##                     Max.   :16.000                                        
-##   metformin         repaglinide        nateglinide       
-##  Length:67113       Length:67113       Length:67113      
-##  Class :character   Class :character   Class :character  
-##  Mode  :character   Mode  :character   Mode  :character  
-##                                                          
-##                                                          
-##                                                          
-##  chlorpropamide     glimepiride        acetohexamide     
-##  Length:67113       Length:67113       Length:67113      
-##  Class :character   Class :character   Class :character  
-##  Mode  :character   Mode  :character   Mode  :character  
-##                                                          
-##                                                          
-##                                                          
-##   glipizide          glyburide         tolbutamide       
-##  Length:67113       Length:67113       Length:67113      
-##  Class :character   Class :character   Class :character  
-##  Mode  :character   Mode  :character   Mode  :character  
-##                                                          
-##                                                          
-##                                                          
-##  pioglitazone       rosiglitazone        acarbose        
-##  Length:67113       Length:67113       Length:67113      
-##  Class :character   Class :character   Class :character  
-##  Mode  :character   Mode  :character   Mode  :character  
-##                                                          
-##                                                          
-##                                                          
-##    miglitol         troglitazone        tolazamide       
-##  Length:67113       Length:67113       Length:67113      
-##  Class :character   Class :character   Class :character  
-##  Mode  :character   Mode  :character   Mode  :character  
-##                                                          
-##                                                          
-##                                                          
-##    examide          citoglipton          insulin         
-##  Length:67113       Length:67113       Length:67113      
-##  Class :character   Class :character   Class :character  
-##  Mode  :character   Mode  :character   Mode  :character  
-##                                                          
-##                                                          
-##                                                          
-##  glyburide_metformin glipizide_metformin glimepiride_pioglitazone
-##  Length:67113        Length:67113        Length:67113            
-##  Class :character    Class :character    Class :character        
-##  Mode  :character    Mode  :character    Mode  :character        
+##                                                                     
+##  number_emergency  number_inpatient          diag_1     
+##  Min.   : 0.0000   Min.   : 0.0000   Circulatory:20790  
+##  1st Qu.: 0.0000   1st Qu.: 0.0000   Other      :11499  
+##  Median : 0.0000   Median : 0.0000   Respiratory: 9203  
+##  Mean   : 0.1069   Mean   : 0.1834   Digestive  : 6306  
+##  3rd Qu.: 0.0000   3rd Qu.: 0.0000   Diabetes   : 5131  
+##  Max.   :42.0000   Max.   :12.0000   Injury     : 4534  
+##                                      (Other)    : 9650  
+##            diag_2                diag_3      number_diagnoses
+##  Circulatory  :21837   Circulatory  :20872   Min.   : 3.000  
+##  Other        :17030   Other        :19035   1st Qu.: 6.000  
+##  Diabetes     : 8908   Diabetes     :12213   Median : 8.000  
+##  Respiratory  : 6754   Respiratory  : 4550   Mean   : 7.325  
+##  Genitourinary: 5207   Genitourinary: 3935   3rd Qu.: 9.000  
+##  Digestive    : 2796   Digestive    : 2668   Max.   :16.000  
+##  (Other)      : 4581   (Other)      : 3840                   
+##  max_glu_serum a1cresult     metformin     repaglinide    nateglinide   
+##  &gt;200:  906    &gt;7  : 2779   Down  :  414   Down  :   28   Down  :    8  
+##  &gt;300:  691    &gt;8  : 5730   No    :52824   No    :66209   No    :66631  
+##  None:63861    None:54971   Steady:13086   Steady:  808   Steady:  458  
+##  Norm: 1655    Norm: 3633   Up    :  789   Up    :   68   Up    :   16  
+##                                                                         
+##                                                                         
+##                                                                         
+##  glimepiride     glipizide      glyburide     pioglitazone  
+##  Down  :  131   Down  :  357   Down  :  399   Down  :   79  
+##  No    :63571   No    :58416   No    :59650   No    :62034  
+##  Steady: 3190   Steady: 7779   Steady: 6468   Steady: 4829  
+##  Up    :  221   Up    :  561   Up    :  596   Up    :  171  
+##                                                             
+##                                                             
+##                                                             
+##  rosiglitazone    acarbose       insulin      glyburide_metformin
+##  Down  :   71   No    :66920   Down  : 7062   Down  :    3       
+##  No    :62608   Steady:  183   No    :33101   No    :66644       
+##  Steady: 4305   Up    :   10   Steady:20466   Steady:  460       
+##  Up    :  129                  Up    : 6484   Up    :    6       
 ##                                                                  
 ##                                                                  
 ##                                                                  
-##  metformin_rosiglitazone metformin_pioglitazone    change         
-##  Length:67113            Length:67113           Length:67113      
-##  Class :character        Class :character       Class :character  
-##  Mode  :character        Mode  :character       Mode  :character  
-##                                                                   
-##                                                                   
-##                                                                   
-##  diabetesmed         readmitted       
-##  Length:67113       Length:67113      
-##  Class :character   Class :character  
-##  Mode  :character   Mode  :character  
-##                                       
-##                                       
+##  change     diabetesmed readmitted  discharge      admission_source
+##  Ch:30183   No :16119   No :61003   Home :42231   Emergency:36125  
+##  No:36930   Yes:50994   Yes: 6110   Other:24882   Other    : 9222  
+##                                                   Referral :21766  
+##                                                                    
+##                                                                    
+##                                                                    
 ## </code></pre>
-<p>The dataset used in this study was extracted from the Health Facts database (Cerner Corporation, Kansas City, MO), a national data warehouse that collects comprehensive clinical records across hospitals throughout the United States. Information in the dataset was systematically collected from participating institutions electronic medical records. In this case, we focus on the records on “diabetic” encounters. The dataset contains 67113 observations and 47 variables after data cleaning. Specifically, it incorporates basic information on each “diabetic” encounter for patients, including several demographic characteristics (i.e., “race”, “gender” and “age”), hospital records about diagnosis, medical treatments, and th readmission status for each patient. Most of variables in the dataset are categorical, with two or three categories (e.g., “Yes”, “No”, “Steady”, etc.), indicating whether the patient received some treatments or had some particular features. Information in this dataset can be helpful to evaluate the efficacy of different treatments to reduce the readmission rate of patients due to diabetes. Therefore, the “readmitted” variable is regarded as the main response in the supervised analysis section, which will aim to explore the impact of different treatments to the readmission due to diaebtes. Result of this research is promising to provide some insights in improvement of the diabetes treatment.</p>
-<p>During the data cleaning process, we omitted the variables with too many missing values, i.e., ‘weight’, ‘payer code’ and ‘medical specialty’. Subsequently, few missing values left in other variables were omiited as well. In addtion, we combine “No” and “&gt;30” categories in the “readmitted” variable into “&gt;30” category because it has been verified by research that it is more likely for a patient to readmit after 30 days due to his or her own healthy issues instead of the treatment. Therefore, only readmission within 30 days after discharge is considered to be associated with the treatment in this case, which is why three categories were combined into two indicating readmission related to treatment and readmission irrelevant to treatment respectively.</p>
+<pre class="r"><code>rsample = sample(1:nrow(diabetes_tidy), 20000)
+diabetes_tidy = diabetes_tidy[rsample, ]</code></pre>
+<p>The summary and the table presents an basic but comprehensive overview of the dataset, including the class of each variable, the proportion in the population for categorical variables and the related statitics for numeric variables. Based on the table, (!!!!!!).</p>
+</div>
+<div id="supervised-analysis" class="section level2">
+<h2>Supervised Analysis</h2>
+<p>Classification techniques including logistic regression, k-nearest neighbor classifiers, tree-based methods and support vector machines were applied to predict whether a patient would be readmitted in 30 days. By comparing the performance of different techniques, we explored the association between readmission and potential predictors, and compared the prediction accuracy of each technique.</p>
+<pre class="r"><code># create training set
+set.seed(1)
+nrow_sample = sample(1:nrow(diabetes_tidy), 10000)</code></pre>
+<div id="logistic-model" class="section level4">
+<h4>Logistic Model</h4>
+</div>
+<div id="k-nearest-neighbor-knn-classifiers" class="section level4">
+<h4>K-nearest neighbor (KNN) classifiers</h4>
+<p>K-nearest neighbor (KNN) classifiers is one of the model-free classification methods. KNN requires no assumption on the distrbution that generate the data. Thus we applied KNN in our dataset with large amounts of predictors. Since KNN measures the nearest distance between training points and the point <span class="math inline">\(x_0\)</span> to predict, it is impossible to evaluate the distance if the predictor <span class="math inline">\(x_i\)</span> is categorical. For example, it is not rationale to measure the distance between <span class="math inline">\(x_0\)</span> and “female” or <span class="math inline">\(x_0\)</span> and “male”. Therefore, we only included numerical predictors to construct the KNN model.</p>
+<pre class="r"><code># training and test set for knn
+readmit = diabetes_tidy[nrow_sample,]$readmitted
+train = as.data.frame(diabetes_tidy[nrow_sample, c(6:12, 16)])
+test = diabetes_tidy[-nrow_sample, c(6:12, 16)]
+
+# perform KNN
+set.seed(1)
+library(class)
+fit_knn = knn(train, test, cl = readmit, k = 10)
+library(caret)
+confusionMatrix(fit_knn, diabetes_tidy[-nrow_sample,]$readmitted)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction   No  Yes
+##        No  9073  922
+##        Yes    5    0
+##                                           
+##                Accuracy : 0.9073          
+##                  95% CI : (0.9014, 0.9129)
+##     No Information Rate : 0.9078          
+##     P-Value [Acc &gt; NIR] : 0.5772          
+##                                           
+##                   Kappa : -0.001          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 0.9994          
+##             Specificity : 0.0000          
+##          Pos Pred Value : 0.9078          
+##          Neg Pred Value : 0.0000          
+##              Prevalence : 0.9078          
+##          Detection Rate : 0.9073          
+##    Detection Prevalence : 0.9995          
+##       Balanced Accuracy : 0.4997          
+##                                           
+##        &#39;Positive&#39; Class : No              
+## </code></pre>
+</div>
+<div id="classification-tree" class="section level4">
+<h4>Classification Tree</h4>
+<p>We fitted a classification tree to the training data and used cross-validation on the training set to determine the optimal tree size by chosing the optimal parameter cp.</p>
+<pre class="r"><code>set.seed(1)
+fit_tree = train(diabetes_tidy[-32], diabetes_tidy$readmitted, 
+                   method = &quot;rpart&quot;,
+                   trControl = trainControl(method = &quot;cv&quot;, number = 10))
+plot(fit_tree)</code></pre>
+<p><img src="index_files/figure-html/classification%20tree-1.png" width="90%" /></p>
+<pre class="r"><code>pred_tree = predict(fit_tree, newdata = diabetes_tidy[-nrow_sample,])
+confusionMatrix(pred_tree, diabetes_tidy[-nrow_sample,]$readmitted)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction   No  Yes
+##        No  9078  922
+##        Yes    0    0
+##                                          
+##                Accuracy : 0.9078         
+##                  95% CI : (0.902, 0.9134)
+##     No Information Rate : 0.9078         
+##     P-Value [Acc &gt; NIR] : 0.5088         
+##                                          
+##                   Kappa : 0              
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16         
+##                                          
+##             Sensitivity : 1.0000         
+##             Specificity : 0.0000         
+##          Pos Pred Value : 0.9078         
+##          Neg Pred Value :    NaN         
+##              Prevalence : 0.9078         
+##          Detection Rate : 0.9078         
+##    Detection Prevalence : 1.0000         
+##       Balanced Accuracy : 0.5000         
+##                                          
+##        &#39;Positive&#39; Class : No             
+## </code></pre>
+</div>
+<div id="random-forest" class="section level4">
+<h4>Random Forest</h4>
+<pre class="r"><code>set.seed(1)
+library(randomForest)
+library(caret)
+diabetes_rf &lt;- mutate(diabetes_tidy, readmitted = ifelse(readmitted ==&#39;Yes&#39;, 1,0)) %&gt;%
+  ungroup() %&gt;%
+  mutate_if(is.character, as.factor)
+
+fit_rf = randomForest(readmitted~., data = diabetes_rf, subset = nrow_sample, mtry = 6, importance = TRUE)
+importance(fit_rf)</code></pre>
+<pre><code>##                        %IncMSE IncNodePurity
+## encounter_id        27.1362615   68.00481815
+## patient_nbr         21.8747297   68.02757354
+## race                 0.4359580   13.64779612
+## gender               1.3716641    9.26499283
+## age                  5.0554337   37.51504341
+## time_in_hospital    20.0635007   33.98327248
+## num_lab_procedures  16.6073867   55.72737620
+## num_procedures      10.8062289   22.09249944
+## num_medications     19.7273044   48.49252043
+## number_outpatient    4.6425422   11.51467789
+## number_emergency     5.8274301   10.16372889
+## number_inpatient    15.0891378   19.60759594
+## diag_1               8.7737919   49.09467148
+## diag_2               4.6631794   44.70743004
+## diag_3               1.9183655   43.91355014
+## number_diagnoses    12.5839847   21.09340953
+## max_glu_serum        7.3002060    7.51065710
+## a1cresult            3.1591096   13.38711395
+## metformin           -0.7650677    8.75625989
+## repaglinide          0.6928259    3.65712232
+## nateglinide         -0.4456840    0.93785577
+## glimepiride          1.1539299    5.85349872
+## glipizide           -0.4794303   11.41100200
+## glyburide           -0.4423828    8.24722023
+## pioglitazone         1.6583925    6.70055062
+## rosiglitazone        0.5747729    4.38468845
+## acarbose            -1.0010015    0.02258999
+## insulin              6.7149700   21.52499162
+## glyburide_metformin -1.9141914    1.25024126
+## change               5.2488453    6.97046182
+## diabetesmed          0.5212176    6.04720925
+## discharge           13.5808401    8.83931484
+## admission_source     5.0031606   14.26492065</code></pre>
+<pre class="r"><code>pred_rf = predict(fit_rf, newdata=diabetes_tidy[-nrow_sample,],type=&quot;response&quot;)
+# confusionMatrix(pred_rf, diabetes_tidy[-nrow_sample,]$readmitted)</code></pre>
+</div>
+<div id="support-vector-machines" class="section level4">
+<h4>Support Vector Machines</h4>
+<pre class="r"><code>library(e1071)
+library(caret)
+# model construction
+svm.model = svm(readmitted~.,data=diabetes_tidy[nrow_sample,c(-1,-2)],type=&quot;C-classification&quot;,cost=10,gamma=0.01)
+# training error
+svm.pred = predict(svm.model,newdata=diabetes_tidy[nrow_sample,c(-1,-2)])
+confusionMatrix(svm.pred,diabetes_tidy[nrow_sample,]$readmitted)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction   No  Yes
+##        No  9099  887
+##        Yes    0   14
+##                                           
+##                Accuracy : 0.9113          
+##                  95% CI : (0.9056, 0.9168)
+##     No Information Rate : 0.9099          
+##     P-Value [Acc &gt; NIR] : 0.32            
+##                                           
+##                   Kappa : 0.0279          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 1.00000         
+##             Specificity : 0.01554         
+##          Pos Pred Value : 0.91118         
+##          Neg Pred Value : 1.00000         
+##              Prevalence : 0.90990         
+##          Detection Rate : 0.90990         
+##    Detection Prevalence : 0.99860         
+##       Balanced Accuracy : 0.50777         
+##                                           
+##        &#39;Positive&#39; Class : No              
+## </code></pre>
+<pre class="r"><code># test error
+svm.pred.test = predict(svm.model,newdata=diabetes_tidy[-nrow_sample,c(-1,-2)])
+confusionMatrix(svm.pred.test,diabetes_tidy[-nrow_sample,]$readmitted)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction   No  Yes
+##        No  9073  922
+##        Yes    5    0
+##                                           
+##                Accuracy : 0.9073          
+##                  95% CI : (0.9014, 0.9129)
+##     No Information Rate : 0.9078          
+##     P-Value [Acc &gt; NIR] : 0.5772          
+##                                           
+##                   Kappa : -0.001          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 0.9994          
+##             Specificity : 0.0000          
+##          Pos Pred Value : 0.9078          
+##          Neg Pred Value : 0.0000          
+##              Prevalence : 0.9078          
+##          Detection Rate : 0.9073          
+##    Detection Prevalence : 0.9995          
+##       Balanced Accuracy : 0.4997          
+##                                           
+##        &#39;Positive&#39; Class : No              
+## </code></pre>
+</div>
+<div id="logistic-regression" class="section level4">
+<h4>Logistic Regression</h4>
+<pre class="r"><code>logit.fit = glm(readmitted~.-encounter_id-patient_nbr,data=diabetes_tidy,subset=-nrow_sample,family=&quot;binomial&quot;)
+contrasts(diabetes_tidy$readmitted)</code></pre>
+<pre><code>##     Yes
+## No    0
+## Yes   1</code></pre>
+<pre class="r"><code>test.pred.prob = predict(logit.fit,newdata=diabetes_tidy[nrow_sample,],type=&quot;response&quot;)</code></pre>
+</div>
+</div>
 
 
 

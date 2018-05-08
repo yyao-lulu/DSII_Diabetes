@@ -109,7 +109,7 @@ Classification techniques including logistic regression, k-nearest neighbor clas
 ```{r training set}
 # create training set
 set.seed(1)
-train_sample = sample(1:nrow(diabetes_tidy), 10000)
+nrow_sample = sample(1:nrow(diabetes_tidy), 10000)
 ```
 
 #### Logistic Model
@@ -119,16 +119,16 @@ K-nearest neighbor (KNN) classifiers is one of the model-free classification met
 
 ```{r KNN}
 # training and test set for knn
-readmit = diabetes_tidy[train_sample,]$readmitted
-train = as.data.frame(diabetes_tidy[train_sample, c(6:12, 16)])
-test = diabetes_tidy[-train_sample, c(6:12, 16)]
+readmit = diabetes_tidy[nrow_sample,]$readmitted
+train = as.data.frame(diabetes_tidy[nrow_sample, c(6:12, 16)])
+test = diabetes_tidy[-nrow_sample, c(6:12, 16)]
 
 # perform KNN
 set.seed(1)
 library(class)
 fit_knn = knn(train, test, cl = readmit, k = 10)
 library(caret)
-confusionMatrix(fit_knn, diabetes_tidy[-train_sample,]$readmitted)
+confusionMatrix(fit_knn, diabetes_tidy[-nrow_sample,]$readmitted)
 ```
 
 #### Classification Tree
@@ -139,8 +139,8 @@ fit_tree = train(diabetes_tidy[-32], diabetes_tidy$readmitted,
                    method = "rpart",
                    trControl = trainControl(method = "cv", number = 10))
 plot(fit_tree)
-pred_tree = predict(fit_tree, newdata = diabetes_tidy[-train_sample,])
-confusionMatrix(pred_tree, diabetes_tidy[-train_sample,]$readmitted)
+pred_tree = predict(fit_tree, newdata = diabetes_tidy[-nrow_sample,])
+confusionMatrix(pred_tree, diabetes_tidy[-nrow_sample,]$readmitted)
 ```
 
 #### Random Forest
@@ -152,24 +152,32 @@ diabetes_rf <- mutate(diabetes_tidy, readmitted = ifelse(readmitted =='Yes', 1,0
   ungroup() %>%
   mutate_if(is.character, as.factor)
 
-fit_rf = randomForest(readmitted~., data = diabetes_rf, subset = train_sample, mtry = 6, importance = TRUE)
+fit_rf = randomForest(readmitted~., data = diabetes_rf, subset = nrow_sample, mtry = 6, importance = TRUE)
 importance(fit_rf)
-pred_rf = predict(fit_rf, newdata = diabetes_tidy[-train_sample,])
-confusionMatrix(pred_rf, diabetes_tidy[-train_sample,]$readmitted)
+pred_rf = predict(fit_rf, newdata=diabetes_tidy[-nrow_sample,],type="response")
+# confusionMatrix(pred_rf, diabetes_tidy[-nrow_sample,]$readmitted)
 ```
 
 #### Support Vector Machines
-```{r}
+```{r svm}
 library(e1071)
 library(caret)
 # model construction
-svm.model = svm(readmitted~.,data=diabetes_tidy[train_sample,c(-1,-2)],type="C-classification",cost=10,gamma=0.01)
+svm.model = svm(readmitted~.,data=diabetes_tidy[nrow_sample,c(-1,-2)],type="C-classification",cost=10,gamma=0.01)
 # training error
-svm.pred = predict(svm.model,newdata=diabetes_tidy[train_sample,c(-1,-2)])
-confusionMatrix(svm.pred,diabetes_tidy[train_sample,]$readmitted)
+svm.pred = predict(svm.model,newdata=diabetes_tidy[nrow_sample,c(-1,-2)])
+confusionMatrix(svm.pred,diabetes_tidy[nrow_sample,]$readmitted)
 # test error
-svm.pred.test = predict(svm.model,newdata=diabetes_tidy[-train_sample,c(-1,-2)])
-confusionMatrix(svm.pred.test,diabetes_tidy[-train_sample,]$readmitted)
+svm.pred.test = predict(svm.model,newdata=diabetes_tidy[-nrow_sample,c(-1,-2)])
+confusionMatrix(svm.pred.test,diabetes_tidy[-nrow_sample,]$readmitted)
 
+```
+
+#### Logistic Regression
+```{r logistic}
+logit.fit = glm(readmitted~.-encounter_id-patient_nbr,data=diabetes_tidy,subset=-nrow_sample,family="binomial")
+# contrasts(diabetes_tidy$readmitted)
+test.pred.prob = predict(logit.fit,newdata=diabetes_tidy[nrow_sample,],type="response")
+# confusionMatrix
 ```
 
