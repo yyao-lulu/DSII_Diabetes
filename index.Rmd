@@ -22,6 +22,10 @@ knitr::opts_chunk$set(
 library(MASS)
 library(tidyverse)
 library(janitor)
+library(ggridges)
+library(ggthemes)
+library(class)
+library(caret)
 
 theme_set(theme_bw())
 theme_update(legend.position = "bottom")
@@ -98,13 +102,13 @@ More detailed information can be found in [here](ref:).
 
 ## Explanatory Data Analysis
 ```{r}
-# For numeric variables
+# summary table for numeric variables
 diabetes_tidy %>% 
   select_if(is.integer) %>% 
   apply(2,summary) %>% 
   pander::pander(caption="For numeric variables")
 
-# For categorical variables
+# summary table for categorical variables
 freq.table = function(x,name){
   table = data.frame(x)
   names(table) = c("Value","Count")
@@ -119,6 +123,38 @@ fct_diabetes = diabetes_tidy %>%
 do.call(rbind,lapply(seq_along(fct_diabetes),function(i) freq.table(fct_diabetes[i],names(fct_diabetes[i])))) %>% 
   pander::pander(caption="For categorical variables")
 
+# visualize the associations
+# readmitted and age
+age = diabetes_tidy %>%
+  group_by(age) %>% 
+  summarise(count_yes = sum(readmitted == "Yes"),
+            count_no = sum(readmitted == "No"),
+            proportion = count_yes/(count_yes + count_no))
+
+ggplot(age, aes(age, proportion, group = 1)) + 
+  geom_point() +
+  geom_line() +
+  labs(title = "The Association Between Readmitted Distribution and Age",
+       x = "Age",
+       y = "Readmitted Proportion")
+
+# readmitted and primary diagnosis
+disease = diabetes_tidy %>%
+  group_by(diag_1) %>% 
+  summarise(count_yes = sum(readmitted == "Yes"),
+            count_no = sum(readmitted == "No"),
+            proportion = count_yes/(count_yes + count_no))
+
+overall_prop = sum(disease$count_yes)/(sum(disease$count_yes) + sum(disease$count_no))
+ggplot(disease, aes(proportion, diag_1)) +
+  geom_point() +
+  geom_vline(xintercept = overall_prop, color = "red") + 
+  labs(title = "The Association Between Readmitted Distribution and Diagnosed Disease",
+       x = "Readmitted Proportion",
+       y = "Primary Diagnosis")
+```
+
+```{r sample data}
 set.seed(100)
 rsample = sample(1:nrow(diabetes_tidy), 20000)
 diabetes_tidy = diabetes_tidy[rsample, ]
@@ -149,9 +185,7 @@ test = diabetes_tidy[-nrow_train, c(4:10, 14)]
 
 # perform KNN
 set.seed(1)
-library(class)
 fit_knn = knn(train, test, cl = readmit, k = 10)
-library(caret)
 confusionMatrix(fit_knn, diabetes_tidy[-nrow_train,]$readmitted)
 ```
 
@@ -159,9 +193,11 @@ confusionMatrix(fit_knn, diabetes_tidy[-nrow_train,]$readmitted)
 We fitted a classification tree to the training data and used cross-validation on the training set to determine the optimal tree size by chosing the optimal parameter cp.
 ```{r classification tree}
 set.seed(1)
-fit_tree = train(diabetes_tidy[-30], diabetes_tidy$readmitted, 
-                   method = "rpart",
-                   trControl = trainControl(method = "cv", number = 10))
+train_tree = diabetes_tidy[nrow_train,]
+fit_tree = train(train_tree[,-30],
+                 train_tree$readmitted,
+                 method = "rpart",
+                 trControl = trainControl(method = "cv", number = 10))
 plot(fit_tree)
 pred_tree = predict(fit_tree, newdata = diabetes_tidy[-nrow_train,])
 confusionMatrix(pred_tree, diabetes_tidy[-nrow_train,]$readmitted)
@@ -174,7 +210,6 @@ Random forest technique was also used in this case. This method can not only pre
 ```{r randomforest}
 set.seed(1)
 library(randomForest)
-library(caret)
 
 diabetes_rf <- mutate(diabetes_tidy, readmitted = ifelse(readmitted =='Yes', 1,0)) %>%
   ungroup()
@@ -196,7 +231,6 @@ After predicting the response in test set, we compared the predicted ones with t
 #### Support Vector Machines
 ```{r svm}
 library(e1071)
-library(caret)
 
 # model construction
 svm.model = svm(readmitted~.,data=diabetes_tidy[nrow_train,],type="C-classification",cost=10,gamma=0.01)
