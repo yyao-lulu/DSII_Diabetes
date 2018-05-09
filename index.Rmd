@@ -122,7 +122,11 @@ fct_diabetes = diabetes_tidy %>%
 
 do.call(rbind,lapply(seq_along(fct_diabetes),function(i) freq.table(fct_diabetes[i],names(fct_diabetes[i])))) %>% 
   pander::pander(caption="For categorical variables")
+```
 
+The summary and the table presents a basic but comprehensive overview of the dataset, including the class of each variable, the proportion in the population for categorical variables and the related statitics for numeric variables. Based on the table, it can be found that there are 8 continuous and 24 categorical variables after data cleaning. Most patients are caucasian. Remarkably, older people seem to have higher risk for diabetes since the age of patients mostly falls around 70. The mean number of medications prescribed for those patients is about 16, among which insulin is still the major treatment medication since over 50% patients take insulin while the proportion of patients who take other medication is so small. Concerning the response "readmitted", only 10% of all patients studied in this case readmit within 30 days after previous discharge. Even though it is a minor fraction, it is still essential to study how to improve the treatment to avoid readmission. 
+
+```{r}
 # visualize the associations
 # readmitted and age
 age = diabetes_tidy %>%
@@ -154,13 +158,17 @@ ggplot(disease, aes(proportion, diag_1)) +
        y = "Primary Diagnosis")
 ```
 
+By exploring the association between readmission proportion and some potential predictors, we obtained some interesting findings. As shown in the first plot above, the readmitted proportion increased dramatically in the age interval 0-30, then it almost remained stable in the age interval 30-60, with a following trend of increase in 60-90. It indicated that older diabete patients (above 60) tended to have a higher probability of being readmitted in 30 days. However, for 90+ years old patients, they had a relatively lower readmitted proportion compared to those with the age of 80-90. It could be possible that the patients with the age of 90+ were more likely to be expired due to other diseases before readmission.
+&nbsp;
+
+The second plot demonstrated the relationship between readmission proportion and primary diagnosis. The red vertical line is the reference line, representing the average proportion of readmitted. The readmitted proportions of patients diagnosed with neoplasms, genitourinary and other diseases were around the reference line, which indicated that these diseases might not have a strong relationship with readmission. In contrast, patients diagnosed with respiratory and injury could have a strong relationship with readmission status.
+
 ```{r sample data}
 set.seed(100)
 rsample = sample(1:nrow(diabetes_tidy), 20000)
 diabetes_tidy = diabetes_tidy[rsample, ]
 ```
 
-The summary and the table presents an basic but comprehensive overview of the dataset, including the class of each variable, the proportion in the population for categorical variables and the related statitics for numeric variables. Based on the table, it can be found that there are 8 continuous and 24 categorical variables after data cleaning. Most patients are caucasian. Remarkably, older people seem to have higher risk for diabetes since the age of patients mostly falls around 70. The mean number of medications prescribed for those patients is about 16, among which insulin is still the major treatment medication since over 50% patients take insulin while the proportion of patients who take other medication is so small. Concerning the response "readmitted", only 10% of all patients studied in this case readmit within 30 days after previous discharge. Even though it is a minor fraction, it is still essential to study how to improve the treatment to avoid readmission.   
 
 ## Supervised Analysis
 
