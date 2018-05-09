@@ -45,7 +45,11 @@ diabetes <- diabetes %>%
          !(discharge_disposition_id %in% c(11,13,14,19:21))) %>% 
 # Classify the readmitted status into “Yes” if the patient was readmitted in less than 30 days and “No” if the patient was readmitted in more than 30 days or no record of readmission. 
   ungroup() %>% 
-  mutate(readmitted=ifelse(readmitted=="<30","Yes","No"))
+  mutate(readmitted=ifelse(readmitted=="<30","Yes","No")) %>% 
+  filter(nateglinide %in% c("No","Steady"),
+         glyburide_metformin %in% c("No","Steady"),
+         gender %in% c("Female","Male"),
+         acarbose %in% c("No","Steady"))
 # Specify the variable "Diagnosis" as the correspnding diagnosed diseases
 diabetes_tidy = diabetes %>% 
   mutate(
@@ -80,8 +84,9 @@ diabetes_tidy = diabetes_tidy %>%
     admission_source = ifelse(admission_source_id==7, "Emergency",
                   ifelse(admission_source_id %in% 1:3, "Referral", "Other"))
   ) %>% 
-  select(-admission_type_id, -admission_source_id, -discharge_disposition_id, -c(chlorpropamide,acetohexamide,tolbutamide,miglitol,troglitazone,tolazamide,examide,citoglipton,glipizide_metformin,glimepiride_pioglitazone,metformin_rosiglitazone,metformin_pioglitazone)) %>%
+  select(-c(encounter_id,patient_nbr,admission_type_id,admission_source_id,discharge_disposition_id,chlorpropamide,acetohexamide,tolbutamide,miglitol,troglitazone,tolazamide,examide,citoglipton,glipizide_metformin,glimepiride_pioglitazone,metformin_rosiglitazone,metformin_pioglitazone)) %>%
   mutate_if(is.character, as.factor)
+
 ```
 
 ## Data Description
@@ -93,8 +98,28 @@ More detailed information can be found in [here](ref:).
 
 ## Explanatory Data Analysis
 ```{r}
-summary(diabetes_tidy) 
+# For numeric variables
+diabetes_tidy %>% 
+  select_if(is.integer) %>% 
+  apply(2,summary) %>% 
+  pander::pander(caption="For numeric variables")
 
+# For categorical variables
+freq.table = function(x,name){
+  table = data.frame(x)
+  names(table) = c("Value","Count")
+  table$Fraction = with(table,Count/sum(Count))
+  data.frame(Variable=name,table)
+}
+
+fct_diabetes = diabetes_tidy %>%
+  select_if(is.factor) %>% 
+  lapply(table)
+
+do.call(rbind,lapply(seq_along(fct_diabetes),function(i) freq.table(fct_diabetes[i],names(fct_diabetes[i])))) %>% 
+  pander::pander(caption="For categorical variables")
+
+set.seed(100)
 rsample = sample(1:nrow(diabetes_tidy), 20000)
 diabetes_tidy = diabetes_tidy[rsample, ]
 ```
@@ -107,9 +132,9 @@ The summary and the table presents an basic but comprehensive overview of the da
 Classification techniques including logistic regression, k-nearest neighbor classifiers, tree-based methods and support vector machines were applied to predict whether a patient would be readmitted in 30 days. By comparing the performance of different techniques, we explored the association between readmission and potential predictors, and compared the prediction accuracy of each technique. 
 
 ```{r training set}
-# create training set
+# create test set
 set.seed(1)
-nrow_sample = sample(1:nrow(diabetes_tidy), 10000)
+nrow_train = sample(1:nrow(diabetes_tidy), 10000)
 ```
 
 #### Logistic Model
@@ -119,28 +144,28 @@ K-nearest neighbor (KNN) classifiers is one of the model-free classification met
 
 ```{r KNN}
 # training and test set for knn
-readmit = diabetes_tidy[nrow_sample,]$readmitted
-train = as.data.frame(diabetes_tidy[nrow_sample, c(6:12, 16)])
-test = diabetes_tidy[-nrow_sample, c(6:12, 16)]
+readmit = diabetes_tidy[nrow_train,]$readmitted
+train = as.data.frame(diabetes_tidy[nrow_train, c(4:10, 14)])
+test = diabetes_tidy[-nrow_train, c(4:10, 14)]
 
 # perform KNN
 set.seed(1)
 library(class)
 fit_knn = knn(train, test, cl = readmit, k = 10)
 library(caret)
-confusionMatrix(fit_knn, diabetes_tidy[-nrow_sample,]$readmitted)
+confusionMatrix(fit_knn, diabetes_tidy[-nrow_train,]$readmitted)
 ```
 
 #### Classification Tree
 We fitted a classification tree to the training data and used cross-validation on the training set to determine the optimal tree size by chosing the optimal parameter cp.
 ```{r classification tree}
 set.seed(1)
-fit_tree = train(diabetes_tidy[-32], diabetes_tidy$readmitted, 
+fit_tree = train(diabetes_tidy[-30], diabetes_tidy$readmitted, 
                    method = "rpart",
                    trControl = trainControl(method = "cv", number = 10))
 plot(fit_tree)
-pred_tree = predict(fit_tree, newdata = diabetes_tidy[-nrow_sample,])
-confusionMatrix(pred_tree, diabetes_tidy[-nrow_sample,]$readmitted)
+pred_tree = predict(fit_tree, newdata = diabetes_tidy[-nrow_train,])
+confusionMatrix(pred_tree, diabetes_tidy[-nrow_train,]$readmitted)
 ```
 
 #### Random Forest
@@ -148,36 +173,45 @@ confusionMatrix(pred_tree, diabetes_tidy[-nrow_sample,]$readmitted)
 set.seed(1)
 library(randomForest)
 library(caret)
-diabetes_rf <- mutate(diabetes_tidy, readmitted = ifelse(readmitted =='Yes', 1,0)) %>%
-  ungroup() %>%
-  mutate_if(is.character, as.factor)
 
-fit_rf = randomForest(readmitted~., data = diabetes_rf, subset = nrow_sample, mtry = 6, importance = TRUE)
+diabetes_rf <- mutate(diabetes_tidy, readmitted = ifelse(readmitted =='Yes', 1,0)) %>%
+  ungroup()
+
+fit_rf = randomForest(readmitted~., data = diabetes_rf, subset = nrow_train, mtry = 6, importance = TRUE)
 importance(fit_rf)
-pred_rf = predict(fit_rf, newdata=diabetes_tidy[-nrow_sample,],type="response")
-# confusionMatrix(pred_rf, diabetes_tidy[-nrow_sample,]$readmitted)
+pred_rf_prob = predict(fit_rf, newdata=diabetes_tidy[-nrow_train,],type="response")
+pred_rf = rep("No",length(pred_rf_prob))
+pred_rf[pred_rf_prob>=0.3] = "Yes"
+pred_rf = as.factor(pred_rf)
+confusionMatrix(pred_rf, diabetes_tidy[-nrow_train,]$readmitted)
 ```
 
 #### Support Vector Machines
 ```{r svm}
 library(e1071)
 library(caret)
+
 # model construction
-svm.model = svm(readmitted~.,data=diabetes_tidy[nrow_sample,c(-1,-2)],type="C-classification",cost=10,gamma=0.01)
+svm.model = svm(readmitted~.,data=diabetes_tidy[nrow_train,],type="C-classification",cost=10,gamma=0.01)
+
 # training error
-svm.pred = predict(svm.model,newdata=diabetes_tidy[nrow_sample,c(-1,-2)])
-confusionMatrix(svm.pred,diabetes_tidy[nrow_sample,]$readmitted)
+# svm.pred = predict(svm.model,newdata=diabetes_tidy[-nrow_test,])
+# confusionMatrix(svm.pred,diabetes_tidy[nrow_sample,]$readmitted)
+
 # test error
-svm.pred.test = predict(svm.model,newdata=diabetes_tidy[-nrow_sample,c(-1,-2)])
-confusionMatrix(svm.pred.test,diabetes_tidy[-nrow_sample,]$readmitted)
+svm.pred.test = predict(svm.model,newdata=diabetes_tidy[-nrow_train,])
+
+confusionMatrix(svm.pred.test,diabetes_tidy[-nrow_train,]$readmitted)
 
 ```
 
 #### Logistic Regression
 ```{r logistic}
-logit.fit = glm(readmitted~.-encounter_id-patient_nbr,data=diabetes_tidy,subset=-nrow_sample,family="binomial")
+logit.fit = glm(readmitted~.,data=diabetes_tidy,subset=nrow_train,family="binomial")
 # contrasts(diabetes_tidy$readmitted)
-test.pred.prob = predict(logit.fit,newdata=diabetes_tidy[nrow_sample,],type="response")
-# confusionMatrix
+logit.pred.prob = predict(logit.fit,newdata=diabetes_tidy[-nrow_train,],type="response")
+logit.pred = rep("No",length(logit.pred.prob))
+logit.pred[logit.pred.prob>=0.3] = "Yes"
+confusionMatrix(logit.pred,diabetes_tidy[-nrow_train,]$readmitted)
 ```
 
