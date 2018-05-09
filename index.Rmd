@@ -182,6 +182,7 @@ nrow_train = sample(1:nrow(diabetes_tidy), 10000)
 
 #### K-nearest neighbor (KNN) classifiers
 K-nearest neighbor (KNN) classifiers is one of the model-free classification methods. KNN requires no assumption on the distrbution that generate the data. Thus we applied KNN in our dataset with large amounts of predictors. Since KNN measures the nearest distance between training points and the point $x_0$ to predict, it is impossible to evaluate the distance if the predictor $x_i$ is categorical. For example, it is not rationale to measure the distance between $x_0$ and "female" or $x_0$ and "male". Therefore, we only included numerical predictors to construct the KNN model.
+As shown in the results, the test error rate of KNN was 9.64%. According to the confusion matrix, 958 patients readmitted in 30 days were misclassified to the group with no readmission, while 6 patients who had not been readmitted were misclassified to the group with readmission.
 
 ```{r KNN}
 # training and test set for knn
@@ -197,7 +198,8 @@ cm.knn = confusionMatrix(pred_knn, diabetes_tidy[-nrow_train,]$readmitted); cm.k
 ```
 
 #### Classification Tree
-We fitted a classification tree to the training data and used cross-validation on the training set to determine the optimal tree size by chosing the optimal parameter cp.
+We fitted a classification tree to the training data and used cross-validation on the training set to determine the optimal tree size by chosing the optimal parameter cp. After the model fitting, we obtained the test error rate of 9.6%, with an extremely high sensitivity of 100% and an extremly low specificity of 0%.
+
 ```{r classification tree}
 set.seed(1)
 train_tree = diabetes_tidy[nrow_train,]
@@ -205,7 +207,6 @@ fit_tree = train(train_tree[,-30],
                  train_tree$readmitted,
                  method = "rpart",
                  trControl = trainControl(method = "cv", number = 10))
-plot(fit_tree)
 pred_tree_prob = predict(fit_tree, newdata = diabetes_tidy[-nrow_train,],type="prob")
 pred_tree = predict(fit_tree, newdata = diabetes_tidy[-nrow_train,])
 cm.tree = confusionMatrix(pred_tree, diabetes_tidy[-nrow_train,]$readmitted); cm.tree
