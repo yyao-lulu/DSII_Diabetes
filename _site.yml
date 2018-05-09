@@ -1,13 +1,16 @@
-name: "Yay internet!"
-output_dir: "."
+name: Yay internet!
+output_dir: .
 navbar:
-  title: "Home"
+  title: Home
   right:
-    - text: "About"
-      href: about.html
-    - icon: fa-envelope fa-lg
-      href: mailto:<you@youremail.com>
-    - icon: fa-github fa-lg
-      href: http://github.com/<YOUR_GH_NAME>/
+  - text: About
+    href: about.html
+  - icon: fa-envelope fa-lg
+    href: mailto:<you@youremail.com>
+  - icon: fa-github fa-lg
+    href: http://github.com/<YOUR_GH_NAME>/
 output:
-  html_document
+  html_document:
+    lib_dir: site_libs
+    self_contained: no
+
