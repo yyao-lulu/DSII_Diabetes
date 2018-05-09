@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Yangwei Yan (yy2828), Yunqiu Yao (yy2827), Boxuan Li (bl2689)" />
+
+
+<title>Study on Key Factors that Affect Diabetes Patient Readmission</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="mailto:&lt;you@youremail.com&gt;">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://github.com/&lt;YOUR_GH_NAME&gt;/">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Study on Key Factors that Affect Diabetes Patient Readmission</h1>
+<h4 class="author"><em>Yangwei Yan (yy2828), Yunqiu Yao (yy2827), Boxuan Li (bl2689)</em></h4>
+<h4 class="date"><em>4/18/2018</em></h4>
+
+</div>
+
+
+<p>In real life, it is very important to know if a patient will be readmitted in some hospital due to some particular diseases. It is not only because readmission indicates that the patient needs to suffer more from the disease, also a potential reminder that the treatment previously used to treat those patients is not effective enough. Generally, readmission should be avoided thus exploring the way to prevent readmission becomes a concern. And it is the major motivation for this study. In this case, a dataset about the readmission status of patients with diabetes extracted from the hospital records, including information on the patient’s demographic characteristics, the diagnosis and treatment, is analyzed to explore the impact of those features on the incidence of readmission in the population. This report includes the data description, exploratory study and supervised analysis, which serve to provide a sense of the data and relationship among variables in whole. The result shows that there is assication between serveral covatiates and the readmission occurrence, e.g., age, number of medications prescribed, etc.</p>
+<pre class="r"><code>diabetes &lt;- read_csv(&#39;./data/diabetic_data.csv&#39;) %&gt;%
+  clean_names()
+
+# missing value proportion
+diabetes[diabetes==&quot;?&quot;] = NA
+sapply(diabetes,function(x) sum(is.na(x))/dim(diabetes)[1]) %&gt;% .[.!=0]</code></pre>
+<pre><code>##              race            weight        payer_code medical_specialty 
+##      0.0223355541      0.9685847926      0.3955741603      0.4908220820 
+##            diag_1            diag_2            diag_3 
+##      0.0002063558      0.0035178743      0.0139830592</code></pre>
+<pre class="r"><code># Therefore, we consider to omit those variables with large number of missing values, i.e., &#39;weight&#39;, &#39;payer code&#39; and &#39;medical specialty&#39;. We further omit NA values in other variables.
+diabetes &lt;- diabetes %&gt;%
+  select(., everything(), -weight, -payer_code, -medical_specialty) %&gt;%
+  na.omit() %&gt;%
+  arrange(patient_nbr) %&gt;% 
+  group_by(patient_nbr) %&gt;% 
+  filter(row_number(encounter_id)==1,
+         !(discharge_disposition_id %in% c(11,13,14,19:21))) %&gt;% 
+# Classify the readmitted status into “Yes” if the patient was readmitted in less than 30 days and “No” if the patient was readmitted in more than 30 days or no record of readmission. 
+  ungroup() %&gt;% 
+  mutate(readmitted=ifelse(readmitted==&quot;&lt;30&quot;,&quot;Yes&quot;,&quot;No&quot;)) %&gt;% 
+  filter(nateglinide %in% c(&quot;No&quot;,&quot;Steady&quot;),
+         glyburide_metformin %in% c(&quot;No&quot;,&quot;Steady&quot;),
+         gender %in% c(&quot;Female&quot;,&quot;Male&quot;),
+         acarbose %in% c(&quot;No&quot;,&quot;Steady&quot;))
+# Specify the variable &quot;Diagnosis&quot; as the correspnding diagnosed diseases
+diabetes_tidy = diabetes %&gt;% 
+  mutate(
+    diag_1=ifelse(diag_1&gt;=390 &amp; diag_1 &lt;= 459 | diag_1 == 785, &quot;Circulatory&quot;, 
+                  ifelse(diag_1&gt;=460 &amp; diag_1 &lt;= 519 | diag_1 == 786, &quot;Respiratory&quot;, 
+                  ifelse(diag_1&gt;=520 &amp; diag_1 &lt;= 579 | diag_1 == 787, &quot;Digestive&quot;,
+                  ifelse(substr(diag_1, 1, 3) == 250, &quot;Diabetes&quot;, 
+                  ifelse(diag_1&gt;=800 &amp; diag_1 &lt;= 999, &quot;Injury&quot;,
+                  ifelse(diag_1&gt;=710 &amp; diag_1 &lt;= 739, &quot;Musculoskeletal&quot;,
+                  ifelse(diag_1&gt;=580 &amp; diag_1 &lt;= 629 | diag_1 == 788, &quot;Genitourinary&quot;,
+                  ifelse(diag_1&gt;=140 &amp; diag_1 &lt;= 239, &quot;Neoplasms&quot;, &quot;Other&quot;)))))))),
+    diag_2=ifelse(diag_2&gt;=390 &amp; diag_2 &lt;= 459 | diag_2 == 785, &quot;Circulatory&quot;, 
+                  ifelse(diag_2&gt;=460 &amp; diag_2 &lt;= 519 | diag_2 == 786, &quot;Respiratory&quot;, 
+                  ifelse(diag_2&gt;=520 &amp; diag_2 &lt;= 579 | diag_2 == 787, &quot;Digestive&quot;,
+                  ifelse(substr(diag_2, 1, 3) == 250, &quot;Diabetes&quot;, 
+                  ifelse(diag_2&gt;=800 &amp; diag_2 &lt;= 999, &quot;Injury&quot;,
+                  ifelse(diag_2&gt;=710 &amp; diag_2 &lt;= 739, &quot;Musculoskeletal&quot;,
+                  ifelse(diag_2&gt;=580 &amp; diag_2 &lt;= 629 | diag_2 == 788, &quot;Genitourinary&quot;,
+                  ifelse(diag_2&gt;=140 &amp; diag_2 &lt;= 239, &quot;Neoplasms&quot;, &quot;Other&quot;)))))))),
+    diag_3=ifelse(diag_3&gt;=390 &amp; diag_3 &lt;= 459 | diag_3 == 785, &quot;Circulatory&quot;, 
+                  ifelse(diag_3&gt;=460 &amp; diag_3 &lt;= 519 | diag_3 == 786, &quot;Respiratory&quot;, 
+                  ifelse(diag_3&gt;=520 &amp; diag_3 &lt;= 579 | diag_3 == 787, &quot;Digestive&quot;,
+                  ifelse(substr(diag_3, 1, 3) == 250, &quot;Diabetes&quot;, 
+                  ifelse(diag_3&gt;=800 &amp; diag_3 &lt;= 999, &quot;Injury&quot;,
+                  ifelse(diag_3&gt;=710 &amp; diag_3 &lt;= 739, &quot;Musculoskeletal&quot;,
+                  ifelse(diag_3&gt;=580 &amp; diag_3 &lt;= 629 | diag_3 == 788, &quot;Genitourinary&quot;,
+                  ifelse(diag_3&gt;=140 &amp; diag_3 &lt;= 239, &quot;Neoplasms&quot;, &quot;Other&quot;)))))))),
+  ) 
+diabetes_tidy = diabetes_tidy %&gt;% 
+  mutate(
+    discharge = ifelse(discharge_disposition_id==1, &quot;Home&quot;, &quot;Other&quot;),
+    admission_source = ifelse(admission_source_id==7, &quot;Emergency&quot;,
+                  ifelse(admission_source_id %in% 1:3, &quot;Referral&quot;, &quot;Other&quot;))
+  ) %&gt;% 
+  select(-c(encounter_id,patient_nbr,admission_type_id,admission_source_id,discharge_disposition_id,chlorpropamide,acetohexamide,tolbutamide,miglitol,troglitazone,tolazamide,examide,citoglipton,glipizide_metformin,glimepiride_pioglitazone,metformin_rosiglitazone,metformin_pioglitazone)) %&gt;%
+  mutate_if(is.character, as.factor)</code></pre>
+<div id="data-description" class="section level2">
+<h2>Data Description</h2>
+<p>The dataset used in this study was extracted from the Health Facts database (Cerner Corporation, Kansas City, MO), a national data warehouse that collects comprehensive clinical records across hospitals throughout the United States. Information in the dataset was systematically collected from participating institutions electronic medical records. In this case, we focus on the records on “diabetic” encounters. The dataset contains 67069 observations and 47 variables before data cleaning. Specifically, it incorporates basic information on each “diabetic” encounter for patients, including several demographic characteristics (i.e., “race”, “gender” and “age”), hospital records about diagnosis, medical treatments, and the readmission status for each patient. Most of variables in the dataset are categorical, with two or three categories (e.g., “Yes”, “No”, “Steady”, etc.), indicating whether the patient received some treatments with varying doses or had some particular features. Information in this dataset can be helpful to evaluate the efficacy of different treatments to reduce the readmission rate of patients due to diabetes. Therefore, the “readmitted” variable is regarded as the main response in the supervised analysis section, which will aim to explore the impact of different treatments to the readmission due to diaebtes. Result of this research is promising to provide some insights in improvement of the diabetes treatment.</p>
+<p>During the data cleaning process, we omitted the variables with too many missing values with the proportion of missing values over 30%, i.e., ‘weight’, ‘payer code’ and ‘medical specialty’, with few missing values left in other variables omiited as well. Data in the original dataset are considered to be correlated because it contained multiple visits per patients. Thus only the first encounter for each patient was filtered out as the primary admission status. In addtion, we combined “No” and “&gt;30” categories in the “readmitted” variable into “No” category because it has been verified by research that it is more likely for a patient to readmit after 30 days due to his or her own healthy issues instead of the treatment. Therefore, only readmission within 30 days after discharge was considered to be associated with the treatment in this case, which is why three categories were combined into two indicating readmission related to treatment and readmission irrelevant to treatment respectively. In terms of those numeric variables referring to categorical meanings such as “diag_1”, “diag_2”, “diag_3” and “discharge”, we substituted them with the original implications in the form of factors. Futhermore, multiple variables were found to give extremely separate categories, which may bring some errors while predicting the response in the supervised analysis, thus they were also removed and will not be considered in further analyses. After the process of data cleaning, the dataset still contains 67069 observations and 32 variables.</p>
+</div>
+<div id="exploratory-data-analysis" class="section level2">
+<h2>Exploratory Data Analysis</h2>
+<pre class="r"><code># summary table for numeric variables
+diabetes_tidy %&gt;% 
+  select_if(is.integer) %&gt;% 
+  apply(2,summary) %&gt;% 
+  pander::pander(caption=&quot;For numeric variables&quot;)</code></pre>
+<table style="width:97%;">
+<caption>For numeric variables (continued below)</caption>
+<colgroup>
+<col width="19%" />
+<col width="26%" />
+<col width="29%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center"> </th>
+<th align="center">time_in_hospital</th>
+<th align="center">num_lab_procedures</th>
+<th align="center">num_procedures</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><strong>Min.</strong></td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>1st Qu.</strong></td>
+<td align="center">2</td>
+<td align="center">31</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>Median</strong></td>
+<td align="center">4</td>
+<td align="center">44</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>Mean</strong></td>
+<td align="center">4.3</td>
+<td align="center">42.92</td>
+<td align="center">1.44</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>3rd Qu.</strong></td>
+<td align="center">6</td>
+<td align="center">57</td>
+<td align="center">2</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>Max.</strong></td>
+<td align="center">14</td>
+<td align="center">132</td>
+<td align="center">6</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="19%" />
+<col width="25%" />
+<col width="27%" />
+<col width="27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center"> </th>
+<th align="center">num_medications</th>
+<th align="center">number_outpatient</th>
+<th align="center">number_emergency</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><strong>Min.</strong></td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>1st Qu.</strong></td>
+<td align="center">10</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>Median</strong></td>
+<td align="center">14</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>Mean</strong></td>
+<td align="center">15.77</td>
+<td align="center">0.2864</td>
+<td align="center">0.1069</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>3rd Qu.</strong></td>
+<td align="center">20</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>Max.</strong></td>
+<td align="center">81</td>
+<td align="center">42</td>
+<td align="center">42</td>
+</tr>
+</tbody>
+</table>
+<table style="width:72%;">
+<colgroup>
+<col width="19%" />
+<col width="26%" />
+<col width="26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center"> </th>
+<th align="center">number_inpatient</th>
+<th align="center">number_diagnoses</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><strong>Min.</strong></td>
+<td align="center">0</td>
+<td align="center">3</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>1st Qu.</strong></td>
+<td align="center">0</td>
+<td align="center">6</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>Median</strong></td>
+<td align="center">0</td>
+<td align="center">8</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>Mean</strong></td>
+<td align="center">0.1834</td>
+<td align="center">7.325</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>3rd Qu.</strong></td>
+<td align="center">0</td>
+<td align="center">9</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>Max.</strong></td>
+<td align="center">12</td>
+<td align="center">16</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># summary table for categorical variables
+freq.table = function(x,name){
+  table = data.frame(x)
+  names(table) = c(&quot;Value&quot;,&quot;Count&quot;)
+  table$Fraction = with(table,Count/sum(Count))
+  data.frame(Variable=name,table)
+}
+
+fct_diabetes = diabetes_tidy %&gt;%
+  select_if(is.factor) %&gt;% 
+  lapply(table)
+
+do.call(rbind,lapply(seq_along(fct_diabetes),function(i) freq.table(fct_diabetes[i],names(fct_diabetes[i])))) %&gt;% 
+  pander::pander(caption=&quot;For categorical variables&quot;)</code></pre>
+<table style="width:82%;">
+<caption>For categorical variables</caption>
+<colgroup>
+<col width="30%" />
+<col width="25%" />
+<col width="11%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Variable</th>
+<th align="center">Value</th>
+<th align="center">Count</th>
+<th align="center">Fraction</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">race</td>
+<td align="center">AfricanAmerican</td>
+<td align="center">12398</td>
+<td align="center">0.1849</td>
+</tr>
+<tr class="even">
+<td align="center">race</td>
+<td align="center">Asian</td>
+<td align="center">476</td>
+<td align="center">0.007097</td>
+</tr>
+<tr class="odd">
+<td align="center">race</td>
+<td align="center">Caucasian</td>
+<td align="center">51604</td>
+<td align="center">0.7694</td>
+</tr>
+<tr class="even">
+<td align="center">race</td>
+<td align="center">Hispanic</td>
+<td align="center">1459</td>
+<td align="center">0.02175</td>
+</tr>
+<tr class="odd">
+<td align="center">race</td>
+<td align="center">Other</td>
+<td align="center">1132</td>
+<td align="center">0.01688</td>
+</tr>
+<tr class="even">
+<td align="center">gender</td>
+<td align="center">Female</td>
+<td align="center">35777</td>
+<td align="center">0.5334</td>
+</tr>
+<tr class="odd">
+<td align="center">gender</td>
+<td align="center">Male</td>
+<td align="center">31292</td>
+<td align="center">0.4666</td>
+</tr>
+<tr class="even">
+<td align="center">age</td>
+<td align="center">[0-10)</td>
+<td align="center">63</td>
+<td align="center">0.0009393</td>
+</tr>
+<tr class="odd">
+<td align="center">age</td>
+<td align="center">[10-20)</td>
+<td align="center">357</td>
+<td align="center">0.005323</td>
+</tr>
+<tr class="even">
+<td align="center">age</td>
+<td align="center">[20-30)</td>
+<td align="center">1003</td>
+<td align="center">0.01495</td>
+</tr>
+<tr class="odd">
+<td align="center">age</td>
+<td align="center">[30-40)</td>
+<td align="center">2519</td>
+<td align="center">0.03756</td>
+</tr>
+<tr class="even">
+<td align="center">age</td>
+<td align="center">[40-50)</td>
+<td align="center">6477</td>
+<td align="center">0.09657</td>
+</tr>
+<tr class="odd">
+<td align="center">age</td>
+<td align="center">[50-60)</td>
+<td align="center">11878</td>
+<td align="center">0.1771</td>
+</tr>
+<tr class="even">
+<td align="center">age</td>
+<td align="center">[60-70)</td>
+<td align="center">15138</td>
+<td align="center">0.2257</td>
+</tr>
+<tr class="odd">
+<td align="center">age</td>
+<td align="center">[70-80)</td>
+<td align="center">17177</td>
+<td align="center">0.2561</td>
+</tr>
+<tr class="even">
+<td align="center">age</td>
+<td align="center">[80-90)</td>
+<td align="center">10756</td>
+<td align="center">0.1604</td>
+</tr>
+<tr class="odd">
+<td align="center">age</td>
+<td align="center">[90-100)</td>
+<td align="center">1701</td>
+<td align="center">0.02536</td>
+</tr>
+<tr class="even">
+<td align="center">diag_1</td>
+<td align="center">Circulatory</td>
+<td align="center">20773</td>
+<td align="center">0.3097</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_1</td>
+<td align="center">Diabetes</td>
+<td align="center">5129</td>
+<td align="center">0.07647</td>
+</tr>
+<tr class="even">
+<td align="center">diag_1</td>
+<td align="center">Digestive</td>
+<td align="center">6306</td>
+<td align="center">0.09402</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_1</td>
+<td align="center">Genitourinary</td>
+<td align="center">3341</td>
+<td align="center">0.04981</td>
+</tr>
+<tr class="even">
+<td align="center">diag_1</td>
+<td align="center">Injury</td>
+<td align="center">4530</td>
+<td align="center">0.06754</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_1</td>
+<td align="center">Musculoskeletal</td>
+<td align="center">3869</td>
+<td align="center">0.05769</td>
+</tr>
+<tr class="even">
+<td align="center">diag_1</td>
+<td align="center">Neoplasms</td>
+<td align="center">2434</td>
+<td align="center">0.03629</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_1</td>
+<td align="center">Other</td>
+<td align="center">11493</td>
+<td align="center">0.1714</td>
+</tr>
+<tr class="even">
+<td align="center">diag_1</td>
+<td align="center">Respiratory</td>
+<td align="center">9194</td>
+<td align="center">0.1371</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_2</td>
+<td align="center">Circulatory</td>
+<td align="center">21818</td>
+<td align="center">0.3253</td>
+</tr>
+<tr class="even">
+<td align="center">diag_2</td>
+<td align="center">Diabetes</td>
+<td align="center">8899</td>
+<td align="center">0.1327</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_2</td>
+<td align="center">Digestive</td>
+<td align="center">2795</td>
+<td align="center">0.04167</td>
+</tr>
+<tr class="even">
+<td align="center">diag_2</td>
+<td align="center">Genitourinary</td>
+<td align="center">5205</td>
+<td align="center">0.07761</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_2</td>
+<td align="center">Injury</td>
+<td align="center">1766</td>
+<td align="center">0.02633</td>
+</tr>
+<tr class="even">
+<td align="center">diag_2</td>
+<td align="center">Musculoskeletal</td>
+<td align="center">1254</td>
+<td align="center">0.0187</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_2</td>
+<td align="center">Neoplasms</td>
+<td align="center">1561</td>
+<td align="center">0.02327</td>
+</tr>
+<tr class="even">
+<td align="center">diag_2</td>
+<td align="center">Other</td>
+<td align="center">17022</td>
+<td align="center">0.2538</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_2</td>
+<td align="center">Respiratory</td>
+<td align="center">6749</td>
+<td align="center">0.1006</td>
+</tr>
+<tr class="even">
+<td align="center">diag_3</td>
+<td align="center">Circulatory</td>
+<td align="center">20857</td>
+<td align="center">0.311</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_3</td>
+<td align="center">Diabetes</td>
+<td align="center">12202</td>
+<td align="center">0.1819</td>
+</tr>
+<tr class="even">
+<td align="center">diag_3</td>
+<td align="center">Digestive</td>
+<td align="center">2668</td>
+<td align="center">0.03978</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_3</td>
+<td align="center">Genitourinary</td>
+<td align="center">3933</td>
+<td align="center">0.05864</td>
+</tr>
+<tr class="even">
+<td align="center">diag_3</td>
+<td align="center">Injury</td>
+<td align="center">1383</td>
+<td align="center">0.02062</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_3</td>
+<td align="center">Musculoskeletal</td>
+<td align="center">1327</td>
+<td align="center">0.01979</td>
+</tr>
+<tr class="even">
+<td align="center">diag_3</td>
+<td align="center">Neoplasms</td>
+<td align="center">1129</td>
+<td align="center">0.01683</td>
+</tr>
+<tr class="odd">
+<td align="center">diag_3</td>
+<td align="center">Other</td>
+<td align="center">19023</td>
+<td align="center">0.2836</td>
+</tr>
+<tr class="even">
+<td align="center">diag_3</td>
+<td align="center">Respiratory</td>
+<td align="center">4547</td>
+<td align="center">0.0678</td>
+</tr>
+<tr class="odd">
+<td align="center">max_glu_serum</td>
+<td align="center">&gt;200</td>
+<td align="center">906</td>
+<td align="center">0.01351</td>
+</tr>
+<tr class="even">
+<td align="center">max_glu_serum</td>
+<td align="center">&gt;300</td>
+<td align="center">690</td>
+<td align="center">0.01029</td>
+</tr>
+<tr class="odd">
+<td align="center">max_glu_serum</td>
+<td align="center">None</td>
+<td align="center">63818</td>
+<td align="center">0.9515</td>
+</tr>
+<tr class="even">
+<td align="center">max_glu_serum</td>
+<td align="center">Norm</td>
+<td align="center">1655</td>
+<td align="center">0.02468</td>
+</tr>
+<tr class="odd">
+<td align="center">a1cresult</td>
+<td align="center">&gt;7</td>
+<td align="center">2777</td>
+<td align="center">0.04141</td>
+</tr>
+<tr class="even">
+<td align="center">a1cresult</td>
+<td align="center">&gt;8</td>
+<td align="center">5722</td>
+<td align="center">0.08532</td>
+</tr>
+<tr class="odd">
+<td align="center">a1cresult</td>
+<td align="center">None</td>
+<td align="center">54942</td>
+<td align="center">0.8192</td>
+</tr>
+<tr class="even">
+<td align="center">a1cresult</td>
+<td align="center">Norm</td>
+<td align="center">3628</td>
+<td align="center">0.05409</td>
+</tr>
+<tr class="odd">
+<td align="center">metformin</td>
+<td align="center">Down</td>
+<td align="center">414</td>
+<td align="center">0.006173</td>
+</tr>
+<tr class="even">
+<td align="center">metformin</td>
+<td align="center">No</td>
+<td align="center">52790</td>
+<td align="center">0.7871</td>
+</tr>
+<tr class="odd">
+<td align="center">metformin</td>
+<td align="center">Steady</td>
+<td align="center">13079</td>
+<td align="center">0.195</td>
+</tr>
+<tr class="even">
+<td align="center">metformin</td>
+<td align="center">Up</td>
+<td align="center">786</td>
+<td align="center">0.01172</td>
+</tr>
+<tr class="odd">
+<td align="center">repaglinide</td>
+<td align="center">Down</td>
+<td align="center">28</td>
+<td align="center">0.0004175</td>
+</tr>
+<tr class="even">
+<td align="center">repaglinide</td>
+<td align="center">No</td>
+<td align="center">66168</td>
+<td align="center">0.9866</td>
+</tr>
+<tr class="odd">
+<td align="center">repaglinide</td>
+<td align="center">Steady</td>
+<td align="center">805</td>
+<td align="center">0.012</td>
+</tr>
+<tr class="even">
+<td align="center">repaglinide</td>
+<td align="center">Up</td>
+<td align="center">68</td>
+<td align="center">0.001014</td>
+</tr>
+<tr class="odd">
+<td align="center">nateglinide</td>
+<td align="center">No</td>
+<td align="center">66611</td>
+<td align="center">0.9932</td>
+</tr>
+<tr class="even">
+<td align="center">nateglinide</td>
+<td align="center">Steady</td>
+<td align="center">458</td>
+<td align="center">0.006829</td>
+</tr>
+<tr class="odd">
+<td align="center">glimepiride</td>
+<td align="center">Down</td>
+<td align="center">131</td>
+<td align="center">0.001953</td>
+</tr>
+<tr class="even">
+<td align="center">glimepiride</td>
+<td align="center">No</td>
+<td align="center">63532</td>
+<td align="center">0.9473</td>
+</tr>
+<tr class="odd">
+<td align="center">glimepiride</td>
+<td align="center">Steady</td>
+<td align="center">3185</td>
+<td align="center">0.04749</td>
+</tr>
+<tr class="even">
+<td align="center">glimepiride</td>
+<td align="center">Up</td>
+<td align="center">221</td>
+<td align="center">0.003295</td>
+</tr>
+<tr class="odd">
+<td align="center">glipizide</td>
+<td align="center">Down</td>
+<td align="center">357</td>
+<td align="center">0.005323</td>
+</tr>
+<tr class="even">
+<td align="center">glipizide</td>
+<td align="center">No</td>
+<td align="center">58377</td>
+<td align="center">0.8704</td>
+</tr>
+<tr class="odd">
+<td align="center">glipizide</td>
+<td align="center">Steady</td>
+<td align="center">7776</td>
+<td align="center">0.1159</td>
+</tr>
+<tr class="even">
+<td align="center">glipizide</td>
+<td align="center">Up</td>
+<td align="center">559</td>
+<td align="center">0.008335</td>
+</tr>
+<tr class="odd">
+<td align="center">glyburide</td>
+<td align="center">Down</td>
+<td align="center">399</td>
+<td align="center">0.005949</td>
+</tr>
+<tr class="even">
+<td align="center">glyburide</td>
+<td align="center">No</td>
+<td align="center">59611</td>
+<td align="center">0.8888</td>
+</tr>
+<tr class="odd">
+<td align="center">glyburide</td>
+<td align="center">Steady</td>
+<td align="center">6464</td>
+<td align="center">0.09638</td>
+</tr>
+<tr class="even">
+<td align="center">glyburide</td>
+<td align="center">Up</td>
+<td align="center">595</td>
+<td align="center">0.008871</td>
+</tr>
+<tr class="odd">
+<td align="center">pioglitazone</td>
+<td align="center">Down</td>
+<td align="center">79</td>
+<td align="center">0.001178</td>
+</tr>
+<tr class="even">
+<td align="center">pioglitazone</td>
+<td align="center">No</td>
+<td align="center">61998</td>
+<td align="center">0.9244</td>
+</tr>
+<tr class="odd">
+<td align="center">pioglitazone</td>
+<td align="center">Steady</td>
+<td align="center">4823</td>
+<td align="center">0.07191</td>
+</tr>
+<tr class="even">
+<td align="center">pioglitazone</td>
+<td align="center">Up</td>
+<td align="center">169</td>
+<td align="center">0.00252</td>
+</tr>
+<tr class="odd">
+<td align="center">rosiglitazone</td>
+<td align="center">Down</td>
+<td align="center">71</td>
+<td align="center">0.001059</td>
+</tr>
+<tr class="even">
+<td align="center">rosiglitazone</td>
+<td align="center">No</td>
+<td align="center">62570</td>
+<td align="center">0.9329</td>
+</tr>
+<tr class="odd">
+<td align="center">rosiglitazone</td>
+<td align="center">Steady</td>
+<td align="center">4299</td>
+<td align="center">0.0641</td>
+</tr>
+<tr class="even">
+<td align="center">rosiglitazone</td>
+<td align="center">Up</td>
+<td align="center">129</td>
+<td align="center">0.001923</td>
+</tr>
+<tr class="odd">
+<td align="center">acarbose</td>
+<td align="center">No</td>
+<td align="center">66886</td>
+<td align="center">0.9973</td>
+</tr>
+<tr class="even">
+<td align="center">acarbose</td>
+<td align="center">Steady</td>
+<td align="center">183</td>
+<td align="center">0.002729</td>
+</tr>
+<tr class="odd">
+<td align="center">insulin</td>
+<td align="center">Down</td>
+<td align="center">7059</td>
+<td align="center">0.1052</td>
+</tr>
+<tr class="even">
+<td align="center">insulin</td>
+<td align="center">No</td>
+<td align="center">33079</td>
+<td align="center">0.4932</td>
+</tr>
+<tr class="odd">
+<td align="center">insulin</td>
+<td align="center">Steady</td>
+<td align="center">20451</td>
+<td align="center">0.3049</td>
+</tr>
+<tr class="even">
+<td align="center">insulin</td>
+<td align="center">Up</td>
+<td align="center">6480</td>
+<td align="center">0.09662</td>
+</tr>
+<tr class="odd">
+<td align="center">glyburide_metformin</td>
+<td align="center">No</td>
+<td align="center">66611</td>
+<td align="center">0.9932</td>
+</tr>
+<tr class="even">
+<td align="center">glyburide_metformin</td>
+<td align="center">Steady</td>
+<td align="center">458</td>
+<td align="center">0.006829</td>
+</tr>
+<tr class="odd">
+<td align="center">change</td>
+<td align="center">Ch</td>
+<td align="center">30139</td>
+<td align="center">0.4494</td>
+</tr>
+<tr class="even">
+<td align="center">change</td>
+<td align="center">No</td>
+<td align="center">36930</td>
+<td align="center">0.5506</td>
+</tr>
+<tr class="odd">
+<td align="center">diabetesmed</td>
+<td align="center">No</td>
+<td align="center">16119</td>
+<td align="center">0.2403</td>
+</tr>
+<tr class="even">
+<td align="center">diabetesmed</td>
+<td align="center">Yes</td>
+<td align="center">50950</td>
+<td align="center">0.7597</td>
+</tr>
+<tr class="odd">
+<td align="center">readmitted</td>
+<td align="center">No</td>
+<td align="center">60961</td>
+<td align="center">0.9089</td>
+</tr>
+<tr class="even">
+<td align="center">readmitted</td>
+<td align="center">Yes</td>
+<td align="center">6108</td>
+<td align="center">0.09107</td>
+</tr>
+<tr class="odd">
+<td align="center">discharge</td>
+<td align="center">Home</td>
+<td align="center">42204</td>
+<td align="center">0.6293</td>
+</tr>
+<tr class="even">
+<td align="center">discharge</td>
+<td align="center">Other</td>
+<td align="center">24865</td>
+<td align="center">0.3707</td>
+</tr>
+<tr class="odd">
+<td align="center">admission_source</td>
+<td align="center">Emergency</td>
+<td align="center">36103</td>
+<td align="center">0.5383</td>
+</tr>
+<tr class="even">
+<td align="center">admission_source</td>
+<td align="center">Other</td>
+<td align="center">9214</td>
+<td align="center">0.1374</td>
+</tr>
+<tr class="odd">
+<td align="center">admission_source</td>
+<td align="center">Referral</td>
+<td align="center">21752</td>
+<td align="center">0.3243</td>
+</tr>
+</tbody>
+</table>
+<p>The summary and the table presents an basic but comprehensive overview of the dataset, including the class of each variable, the proportion in the population for categorical variables and the related statitics for numeric variables. Based on the table, it can be found that there are 8 continuous and 24 categorical variables after data cleaning. Most patients are caucasian. Remarkably, older people seem to have higher risk for diabetes since the age of patients mostly falls around 70. The mean number of medications prescribed for those patients is about 16, among which insulin is still the major treatment medication since over 50% patients take insulin while the proportion of patients who take other medication is so small. Concerning the response “readmitted”, only 10% of all patients studied in this case readmit within 30 days after previous discharge. Even though it is a minor fraction, it is still essential to study how to improve the treatment to avoid readmission.</p>
+<pre class="r"><code># visualize the associations
+# readmitted and age
+age = diabetes_tidy %&gt;%
+  group_by(age) %&gt;% 
+  summarise(count_yes = sum(readmitted == &quot;Yes&quot;),
+            count_no = sum(readmitted == &quot;No&quot;),
+            proportion = count_yes/(count_yes + count_no))
+
+ggplot(age, aes(age, proportion, group = 1)) + 
+  geom_point() +
+  geom_line() +
+  labs(title = &quot;The Association Between Readmitted Distribution and Age&quot;,
+       x = &quot;Age&quot;,
+       y = &quot;Readmitted Proportion&quot;)</code></pre>
+<p><img src="DS2_Final_Project_Diabetes_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
+<pre class="r"><code># readmitted and primary diagnosis
+disease = diabetes_tidy %&gt;%
+  group_by(diag_1) %&gt;% 
+  summarise(count_yes = sum(readmitted == &quot;Yes&quot;),
+            count_no = sum(readmitted == &quot;No&quot;),
+            proportion = count_yes/(count_yes + count_no))
+
+overall_prop = sum(disease$count_yes)/(sum(disease$count_yes) + sum(disease$count_no))
+ggplot(disease, aes(proportion, diag_1)) +
+  geom_point() +
+  geom_vline(xintercept = overall_prop, color = &quot;red&quot;) + 
+  labs(title = &quot;The Association Between Readmitted Distribution and Diagnosed Disease&quot;,
+       x = &quot;Readmitted Proportion&quot;,
+       y = &quot;Primary Diagnosis&quot;)</code></pre>
+<p><img src="DS2_Final_Project_Diabetes_files/figure-html/unnamed-chunk-2-2.png" width="90%" /></p>
+<p>By exploring the association between readmission proportion and some potential predictors, we obtained some interesting findings. As shown in the first plot above, the readmitted proportion increased dramatically in the age interval 0-30, then it almost remained stable in the age interval 30-60, with a following trend of increase in 60-90. It indicated that older diabete patients (above 60) tended to have a higher probability of being readmitted in 30 days. However, for 90+ years old patients, they had a relatively lower readmitted proportion compared to those with the age of 80-90. It could be possible that the patients with the age of 90+ were more likely to be expired due to other diseases before readmission.  </p>
+<p>The second plot demonstrated the relationship between readmission proportion and primary diagnosis. The red vertical line is the reference line, representing the average proportion of readmitted. The readmitted proportions of patients diagnosed with neoplasms, genitourinary and other diseases were around the reference line, which indicated that these diseases might not have a strong relationship with readmission. In contrast, patients diagnosed with respiratory and injury could have a strong relationship with readmission status.</p>
+</div>
+<div id="supervised-analysis" class="section level2">
+<h2>Supervised Analysis</h2>
+<p>Considering the overwhelming data that could cause difficulty in techinics used in supervised analysis, we decided to appropriately reduce the size to 20000 observations randomly.</p>
+<pre class="r"><code>set.seed(100)
+rsample = sample(1:nrow(diabetes_tidy), 20000)
+diabetes_tidy = diabetes_tidy[rsample, ]</code></pre>
+<p>Classification techniques including logistic regression, k-nearest neighbor classifiers, tree-based methods and support vector machines were applied to predict whether a patient would be readmitted in 30 days. By comparing the performance of different techniques, we explored the association between readmission and potential predictors, and compared the prediction accuracy of each technique.</p>
+<pre class="r"><code># create test set
+set.seed(1)
+nrow_train = sample(1:nrow(diabetes_tidy), 10000)</code></pre>
+<div id="k-nearest-neighbor-knn-classifiers" class="section level4">
+<h4>K-nearest neighbor (KNN) classifiers</h4>
+<p>K-nearest neighbor (KNN) classifiers is one of the model-free classification methods. KNN requires no assumption on the distrbution that generate the data. Thus we applied KNN in our dataset with large amounts of predictors. Since KNN measures the nearest distance between training points and the point <span class="math inline">\(x_0\)</span> to predict, it is impossible to evaluate the distance if the predictor <span class="math inline">\(x_i\)</span> is categorical. For example, it is not rationale to measure the distance between <span class="math inline">\(x_0\)</span> and “female” or <span class="math inline">\(x_0\)</span> and “male”. Therefore, we only included numerical predictors to construct the KNN model. As shown in the results, the test error rate of KNN was 9.64%. According to the confusion matrix, 958 patients readmitted in 30 days were misclassified to the group with no readmission, while 6 patients who had not been readmitted were misclassified to the group with readmission.</p>
+<pre class="r"><code># training and test set for knn
+readmit = diabetes_tidy[nrow_train,]$readmitted
+train = as.data.frame(diabetes_tidy[nrow_train, c(4:10, 14)])
+test = diabetes_tidy[-nrow_train, c(4:10, 14)]
+
+# perform KNN
+set.seed(1)
+pred_knn_prob = 1-attributes(knn(train, test, prob=TRUE,cl = readmit, k = 10))$prob
+pred_knn = knn(train, test, cl = readmit, k = 10)
+cm.knn = confusionMatrix(pred_knn, diabetes_tidy[-nrow_train,]$readmitted); cm.knn</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction   No  Yes
+##        No  9034  958
+##        Yes    6    2
+##                                           
+##                Accuracy : 0.9036          
+##                  95% CI : (0.8976, 0.9093)
+##     No Information Rate : 0.904           
+##     P-Value [Acc &gt; NIR] : 0.5625          
+##                                           
+##                   Kappa : 0.0025          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 0.999336        
+##             Specificity : 0.002083        
+##          Pos Pred Value : 0.904123        
+##          Neg Pred Value : 0.250000        
+##              Prevalence : 0.904000        
+##          Detection Rate : 0.903400        
+##    Detection Prevalence : 0.999200        
+##       Balanced Accuracy : 0.500710        
+##                                           
+##        &#39;Positive&#39; Class : No              
+## </code></pre>
+</div>
+<div id="classification-tree" class="section level4">
+<h4>Classification Tree</h4>
+<p>We fitted a classification tree to the training data and used cross-validation on the training set to determine the optimal tree size by chosing the optimal parameter cp. After the model fitting, we obtained the test error rate of 9.6%, with an extremely high sensitivity of 100% and an extremly low specificity of 0%.</p>
+<pre class="r"><code>set.seed(1)
+train_tree = diabetes_tidy[nrow_train,]
+fit_tree = train(train_tree[,-30],
+                 train_tree$readmitted,
+                 method = &quot;rpart&quot;,
+                 trControl = trainControl(method = &quot;cv&quot;, number = 10))
+pred_tree_prob = predict(fit_tree, newdata = diabetes_tidy[-nrow_train,],type=&quot;prob&quot;)
+pred_tree = predict(fit_tree, newdata = diabetes_tidy[-nrow_train,])
+cm.tree = confusionMatrix(pred_tree, diabetes_tidy[-nrow_train,]$readmitted); cm.tree</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction   No  Yes
+##        No  9040  960
+##        Yes    0    0
+##                                           
+##                Accuracy : 0.904           
+##                  95% CI : (0.8981, 0.9097)
+##     No Information Rate : 0.904           
+##     P-Value [Acc &gt; NIR] : 0.5086          
+##                                           
+##                   Kappa : 0               
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 1.000           
+##             Specificity : 0.000           
+##          Pos Pred Value : 0.904           
+##          Neg Pred Value :   NaN           
+##              Prevalence : 0.904           
+##          Detection Rate : 0.904           
+##    Detection Prevalence : 1.000           
+##       Balanced Accuracy : 0.500           
+##                                           
+##        &#39;Positive&#39; Class : No              
+## </code></pre>
+</div>
+<div id="random-forest" class="section level4">
+<h4>Random Forest</h4>
+<p>Random forest technique was also used in this case. This method can not only predict the class of each observation in the test set, also measure the importance of variables during the fitting process. The number of variables randomly sampled as candidates at each split in this study was selected as the squre root of number of covariates used to fit the model, i.e., <span class="math inline">\(\sqrt{32-1}\approx6\)</span>.</p>
+<pre class="r"><code>set.seed(1)
+library(randomForest)
+
+diabetes_rf &lt;- mutate(diabetes_tidy, readmitted = ifelse(readmitted ==&#39;Yes&#39;, 1,0)) %&gt;%
+  ungroup()
+
+fit_rf = randomForest(readmitted~., data = diabetes_rf, subset = nrow_train, mtry = 6, importance = TRUE)
+varImpPlot(fit_rf)</code></pre>
+<p><img src="DS2_Final_Project_Diabetes_files/figure-html/randomforest-1.png" width="90%" /></p>
+<pre class="r"><code>pred_rf_prob = predict(fit_rf, newdata=diabetes_tidy[-nrow_train,],type=&quot;response&quot;)
+pred_rf = rep(&quot;No&quot;,length(pred_rf_prob))
+pred_rf[pred_rf_prob&gt;=0.3] = &quot;Yes&quot;
+pred_rf = as.factor(pred_rf)
+cm.rf = confusionMatrix(pred_rf, diabetes_tidy[-nrow_train,]$readmitted); cm.rf</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction   No  Yes
+##        No  9002  948
+##        Yes   38   12
+##                                           
+##                Accuracy : 0.9014          
+##                  95% CI : (0.8954, 0.9072)
+##     No Information Rate : 0.904           
+##     P-Value [Acc &gt; NIR] : 0.8161          
+##                                           
+##                   Kappa : 0.0144          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 0.9958          
+##             Specificity : 0.0125          
+##          Pos Pred Value : 0.9047          
+##          Neg Pred Value : 0.2400          
+##              Prevalence : 0.9040          
+##          Detection Rate : 0.9002          
+##    Detection Prevalence : 0.9950          
+##       Balanced Accuracy : 0.5041          
+##                                           
+##        &#39;Positive&#39; Class : No              
+## </code></pre>
+<p>The plot of “%IncMSE” and “IncNodePurity” presents the impact of each variable on the change of MSE and node purity in each split during the model fitting. %IncMSE is the most robust and informative measure. It is the increase in mse of predictions(estimated with out-of-bag-CV) as a result of variable j being permuted(values randomly shuffled). And the IncNodePurity relates to the loss function which by best splits are chosen. The larger the two values are, the more important the variable is. Hence, both plots indicate that several variables, e.g., “num_medication”, “time_in_hospital”, “number_lab_procedures”,etc., are the most important to accurately predict the response “readmitted”.</p>
+<p>After predicting the response in test set, we compared the predicted ones with the true reponse and made the confusion matrix. The test error rate is therefore <span class="math inline">\((1-0.9014)*100\%=9.86\%\)</span>.</p>
+</div>
+<div id="support-vector-machines" class="section level4">
+<h4>Support Vector Machines</h4>
+<pre class="r"><code>library(e1071)
+
+# model construction
+svm.model = svm(readmitted~.,data=diabetes_tidy[nrow_train,],probability=TRUE,type=&quot;C-classification&quot;,cost=10,gamma=0.01)
+
+pred_svm_prob = attributes(predict(svm.model,newdata=diabetes_tidy[-nrow_train,],probability=TRUE))$probabilities
+
+pred_svm = predict(svm.model,newdata=diabetes_tidy[-nrow_train,])
+
+cm.svm = confusionMatrix(pred_svm,diabetes_tidy[-nrow_train,]$readmitted); cm.svm</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction   No  Yes
+##        No  9036  958
+##        Yes    4    2
+##                                           
+##                Accuracy : 0.9038          
+##                  95% CI : (0.8979, 0.9095)
+##     No Information Rate : 0.904           
+##     P-Value [Acc &gt; NIR] : 0.5356          
+##                                           
+##                   Kappa : 0.003           
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 0.999558        
+##             Specificity : 0.002083        
+##          Pos Pred Value : 0.904142        
+##          Neg Pred Value : 0.333333        
+##              Prevalence : 0.904000        
+##          Detection Rate : 0.903600        
+##    Detection Prevalence : 0.999400        
+##       Balanced Accuracy : 0.500820        
+##                                           
+##        &#39;Positive&#39; Class : No              
+## </code></pre>
+<p>Here we tried to use support vector machine to perform the classification. In order to capture the potential nonlinearities in the support-vector classifiers and to obtain better prediction, we use the radial kernel for svm. The result shows that we have a low overall error rate (9.62%) for the prediction. The sensitivity is extremely high, with a value 99.96%, while the specificity is very low, which is only 0.21%. This means the svm model performs quite well on identifing those who do not need to be readmitted (true negative), but has poor ability on the identification of those who require readmission (true positive).</p>
+</div>
+<div id="logistic-regression" class="section level4">
+<h4>Logistic Regression</h4>
+<pre class="r"><code>log.fit = glm(readmitted~.,data=diabetes_tidy,subset=nrow_train,family=&quot;binomial&quot;)
+summary(log.fit)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = readmitted ~ ., family = &quot;binomial&quot;, data = diabetes_tidy, 
+##     subset = nrow_train)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.9753  -0.4738  -0.3968  -0.3333   2.6952  
+## 
+## Coefficients:
+##                             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)               -5.994e+01  2.616e+03  -0.023   0.9817    
+## raceAsian                 -2.728e-01  4.385e-01  -0.622   0.5339    
+## raceCaucasian             -2.615e-02  9.474e-02  -0.276   0.7826    
+## raceHispanic              -5.045e-02  2.792e-01  -0.181   0.8566    
+## raceOther                 -2.923e-01  3.269e-01  -0.894   0.3713    
+## genderMale                 6.839e-04  7.207e-02   0.009   0.9924    
+## age[10-20)                 6.175e-02  8.179e+02   0.000   0.9999    
+## age[20-30)                 1.431e+01  7.183e+02   0.020   0.9841    
+## age[30-40)                 1.381e+01  7.183e+02   0.019   0.9847    
+## age[40-50)                 1.397e+01  7.183e+02   0.019   0.9845    
+## age[50-60)                 1.397e+01  7.183e+02   0.019   0.9845    
+## age[60-70)                 1.425e+01  7.183e+02   0.020   0.9842    
+## age[70-80)                 1.422e+01  7.183e+02   0.020   0.9842    
+## age[80-90)                 1.421e+01  7.183e+02   0.020   0.9842    
+## age[90-100)                1.382e+01  7.183e+02   0.019   0.9846    
+## time_in_hospital           9.129e-03  1.441e-02   0.634   0.5263    
+## num_lab_procedures         2.939e-03  2.083e-03   1.411   0.1582    
+## num_procedures            -2.432e-02  2.432e-02  -1.000   0.3173    
+## num_medications           -4.591e-03  5.693e-03  -0.806   0.4200    
+## number_outpatient         -2.242e-03  3.334e-02  -0.067   0.9464    
+## number_emergency           6.148e-02  4.537e-02   1.355   0.1755    
+## number_inpatient           3.727e-01  4.345e-02   8.579  &lt; 2e-16 ***
+## diag_1Diabetes            -6.218e-02  1.568e-01  -0.397   0.6917    
+## diag_1Digestive           -2.893e-01  1.469e-01  -1.969   0.0489 *  
+## diag_1Genitourinary       -3.190e-02  1.760e-01  -0.181   0.8561    
+## diag_1Injury              -1.325e-01  1.490e-01  -0.889   0.3740    
+## diag_1Musculoskeletal     -4.193e-02  1.656e-01  -0.253   0.8001    
+## diag_1Neoplasms           -3.055e-01  2.274e-01  -1.344   0.1791    
+## diag_1Other               -2.075e-01  1.162e-01  -1.786   0.0740 .  
+## diag_1Respiratory         -1.864e-01  1.204e-01  -1.548   0.1216    
+## diag_2Diabetes             1.706e-01  1.240e-01   1.376   0.1689    
+## diag_2Digestive           -9.572e-02  2.048e-01  -0.467   0.6403    
+## diag_2Genitourinary       -3.176e-01  1.526e-01  -2.081   0.0374 *  
+## diag_2Injury               1.333e-01  2.224e-01   0.599   0.5490    
+## diag_2Musculoskeletal      1.207e-01  2.735e-01   0.441   0.6589    
+## diag_2Neoplasms            9.760e-02  2.468e-01   0.395   0.6926    
+## diag_2Other                5.189e-03  9.916e-02   0.052   0.9583    
+## diag_2Respiratory         -1.239e-01  1.299e-01  -0.954   0.3400    
+## diag_3Diabetes             1.989e-02  1.119e-01   0.178   0.8589    
+## diag_3Digestive            3.330e-01  1.812e-01   1.838   0.0661 .  
+## diag_3Genitourinary        1.388e-01  1.524e-01   0.910   0.3626    
+## diag_3Injury               1.676e-02  2.462e-01   0.068   0.9457    
+## diag_3Musculoskeletal     -6.536e-02  2.627e-01  -0.249   0.8035    
+## diag_3Neoplasms            2.642e-01  2.709e-01   0.975   0.3294    
+## diag_3Other               -1.431e-01  9.652e-02  -1.483   0.1381    
+## diag_3Respiratory          1.588e-01  1.379e-01   1.152   0.2494    
+## number_diagnoses           3.924e-02  2.223e-02   1.765   0.0775 .  
+## max_glu_serum&gt;300         -2.910e-01  4.628e-01  -0.629   0.5295    
+## max_glu_serumNone         -1.262e-01  3.041e-01  -0.415   0.6783    
+## max_glu_serumNorm         -3.771e-01  3.890e-01  -0.969   0.3324    
+## a1cresult&gt;8                2.197e-01  2.331e-01   0.942   0.3461    
+## a1cresultNone              2.098e-01  2.018e-01   1.040   0.2985    
+## a1cresultNorm              2.277e-01  2.459e-01   0.926   0.3544    
+## metforminNo                1.412e+01  3.311e+02   0.043   0.9660    
+## metforminSteady            1.408e+01  3.311e+02   0.043   0.9661    
+## metforminUp                1.373e+01  3.311e+02   0.041   0.9669    
+## repaglinideNo              1.415e+01  2.400e+03   0.006   0.9953    
+## repaglinideSteady          1.421e+01  2.400e+03   0.006   0.9953    
+## repaglinideUp              1.543e+01  2.400e+03   0.006   0.9949    
+## nateglinideSteady         -2.398e-01  4.746e-01  -0.505   0.6133    
+## glimepirideNo              4.610e-01  7.487e-01   0.616   0.5381    
+## glimepirideSteady          4.863e-01  7.592e-01   0.641   0.5218    
+## glimepirideUp              6.645e-01  9.676e-01   0.687   0.4923    
+## glipizideNo               -1.146e-01  4.263e-01  -0.269   0.7881    
+## glipizideSteady           -2.151e-02  4.275e-01  -0.050   0.9599    
+## glipizideUp               -3.424e-01  5.752e-01  -0.595   0.5516    
+## glyburideNo                4.846e-01  5.427e-01   0.893   0.3719    
+## glyburideSteady            3.861e-01  5.437e-01   0.710   0.4776    
+## glyburideUp                3.626e-01  6.648e-01   0.545   0.5855    
+## pioglitazoneNo             1.446e+01  6.781e+02   0.021   0.9830    
+## pioglitazoneSteady         1.428e+01  6.781e+02   0.021   0.9832    
+## pioglitazoneUp             1.549e+01  6.781e+02   0.023   0.9818    
+## rosiglitazoneNo           -6.299e-01  7.993e-01  -0.788   0.4307    
+## rosiglitazoneSteady       -8.218e-01  8.103e-01  -1.014   0.3105    
+## rosiglitazoneUp           -4.758e-01  1.100e+00  -0.432   0.6655    
+## acarboseSteady            -1.427e+01  4.742e+02  -0.030   0.9760    
+## insulinNo                 -2.941e-01  1.925e-01  -1.528   0.1265    
+## insulinSteady             -2.921e-01  1.449e-01  -2.016   0.0438 *  
+## insulinUp                 -2.025e-01  1.514e-01  -1.338   0.1809    
+## glyburide_metforminSteady -3.928e-01  5.258e-01  -0.747   0.4551    
+## changeNo                   1.757e-01  1.369e-01   1.283   0.1996    
+## diabetesmedYes             2.226e-01  1.315e-01   1.693   0.0906 .  
+## dischargeOther             5.175e-01  7.916e-02   6.537 6.27e-11 ***
+## admission_sourceOther     -1.219e-01  1.178e-01  -1.035   0.3008    
+## admission_sourceReferral   6.585e-02  8.655e-02   0.761   0.4467    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 6179.4  on 9999  degrees of freedom
+## Residual deviance: 5910.2  on 9915  degrees of freedom
+## AIC: 6080.2
+## 
+## Number of Fisher Scoring iterations: 15</code></pre>
+<pre class="r"><code># contrasts(diabetes_tidy$readmitted)
+pred.log.prob = predict(log.fit,newdata=diabetes_tidy[-nrow_train,],type=&quot;response&quot;)
+pred_log = rep(&quot;No&quot;,length(pred.log.prob))
+pred_log[pred.log.prob&gt;=0.3] = &quot;Yes&quot;
+cm.log = confusionMatrix(pred_log,diabetes_tidy[-nrow_train,]$readmitted); cm.log</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction   No  Yes
+##        No  9002  946
+##        Yes   38   14
+##                                           
+##                Accuracy : 0.9016          
+##                  95% CI : (0.8956, 0.9074)
+##     No Information Rate : 0.904           
+##     P-Value [Acc &gt; NIR] : 0.7976          
+##                                           
+##                   Kappa : 0.018           
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 0.99580         
+##             Specificity : 0.01458         
+##          Pos Pred Value : 0.90491         
+##          Neg Pred Value : 0.26923         
+##              Prevalence : 0.90400         
+##          Detection Rate : 0.90020         
+##    Detection Prevalence : 0.99480         
+##       Balanced Accuracy : 0.50519         
+##                                           
+##        &#39;Positive&#39; Class : No              
+## </code></pre>
+<p>Logistic regression is also a common way to address the classification problems. It can be seen from the table above that the overall error of the logistic model for presiction is very low, at around 10%. But similar to the SVM model, the logistic model also has a high sensitivity but a low specificity. Therefore, the model is also more suitable for the identification of those who are not necessarily to be re-admitted.</p>
+<pre class="r"><code># roc curves
+library(pROC)
+roc.knn = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_knn_prob,levels=c(&quot;No&quot;,&quot;Yes&quot;))
+auc.knn = roc.knn$auc
+roc.tree = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_tree_prob[,2],levels=c(&quot;No&quot;,&quot;Yes&quot;))
+auc.tree = roc.tree$auc
+roc.rf = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_rf_prob,levels=c(&quot;No&quot;,&quot;Yes&quot;))
+auc.rf = roc.rf$auc
+roc.svm = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_svm_prob[,2],levels=c(&quot;No&quot;,&quot;Yes&quot;))
+auc.svm = roc.svm$auc
+roc.log = roc(diabetes_tidy[-nrow_train,]$readmitted,pred.log.prob,levels=c(&quot;No&quot;,&quot;Yes&quot;))
+auc.log = roc.log$auc
+
+# roc plot
+plot(roc.knn,legacy.axes=TRUE,col=&quot;#1c61b6&quot;)
+plot(roc.tree,add=TRUE,col=&quot;#008600&quot;)
+plot(roc.rf,add=TRUE,col=&quot;#840000&quot;)
+plot(roc.svm,add=TRUE,col=&quot;orange&quot;)
+plot(roc.log,add=TRUE,col=&quot;black&quot;)
+legend(&quot;bottomright&quot;, legend = c(&quot;KNN&quot;, &quot;Classification Tree&quot;, &quot;Random Forest&quot;, &quot;SVM&quot;, &quot;Logistic&quot;), col = c(&quot;#1c61b6&quot;, &quot;#008600&quot;, &quot;#840000&quot;, &quot;orange&quot;, &quot;black&quot;), lwd = 2)</code></pre>
+<p><img src="DS2_Final_Project_Diabetes_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<pre class="r"><code># summary table
+method = c(&quot;KNN&quot;,&quot;Classification Tree&quot;,&quot;Random Forest&quot;,&quot;SVM&quot;,&quot;Logistic&quot;)
+auc = round(c(auc.knn,auc.tree,auc.rf,auc.svm,auc.log),3)
+error = round(1-c(cm.knn$overall[[1]],cm.tree$overall[[1]],cm.rf$overall[[1]],cm.svm$overall[[1]],cm.log$overall[[1]]),5)
+sens = round(c(cm.knn$byClass[[1]],cm.tree$byClass[[1]],cm.rf$byClass[[1]],cm.svm$byClass[[1]],cm.log$byClass[[1]]),6)
+spec = round(c(cm.knn$byClass[[2]],cm.tree$byClass[[2]],cm.rf$byClass[[2]],cm.svm$byClass[[2]],cm.log$byClass[[2]]),6)
+comp = cbind(method,auc,error,sens,spec)
+colnames(comp) = c(&quot;Method&quot;,&quot;AUC&quot;,&quot;Error Rate&quot;,&quot;Sensitivity&quot;,&quot;Specificity&quot;)
+pander::pander(comp)</code></pre>
+<table style="width:99%;">
+<colgroup>
+<col width="30%" />
+<col width="11%" />
+<col width="18%" />
+<col width="19%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Method</th>
+<th align="center">AUC</th>
+<th align="center">Error Rate</th>
+<th align="center">Sensitivity</th>
+<th align="center">Specificity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">KNN</td>
+<td align="center">0.532</td>
+<td align="center">0.0964</td>
+<td align="center">0.999336</td>
+<td align="center">0.002083</td>
+</tr>
+<tr class="even">
+<td align="center">Classification Tree</td>
+<td align="center">0.5</td>
+<td align="center">0.096</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">Random Forest</td>
+<td align="center">0.584</td>
+<td align="center">0.0986</td>
+<td align="center">0.995796</td>
+<td align="center">0.0125</td>
+</tr>
+<tr class="even">
+<td align="center">SVM</td>
+<td align="center">0.524</td>
+<td align="center">0.0962</td>
+<td align="center">0.999558</td>
+<td align="center">0.002083</td>
+</tr>
+<tr class="odd">
+<td align="center">Logistic</td>
+<td align="center">0.62</td>
+<td align="center">0.0984</td>
+<td align="center">0.995796</td>
+<td align="center">0.014583</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="discussion-and-conclusion" class="section level2">
+<h2>Discussion and Conclusion</h2>
+<p>In this study, several supervised analysis techniques were utilized to explore the association between multiple covariates and the response “readmitted”. Five models, i.e., KNN, Classification Tree, Random Forest, SVM, Logistic regression, were fitted and their ability of prediction were compared based on the prediction AUC of ROC curve and the test error. Overally, five methods give similar test errors while the AUC of logistic regression is relatively larger. Therefore, the logistic regression may be the most suitable method to predict the readmission. However, five methods are all good at prediction of ‘No’ readmission due to the large sensitivity (with ‘No’ the positive class) while they tend to failure in prediction of ‘Yes’. Hence, these methods are more suitable to predict the true negative status of readmission than to identify the necessary readmission.</p>
+<p>In spite of the low specificity, the logistic regression model and the random forest can still give some informative insights about the significance of cavariates. By combining the summary of logistic regression and the variable imporatance plot of random forest, it can be concluded that the time stay in hospital, the time of inpatient visits within one year, the number of emergency visits, discharge to other places other than home will all have positive association for patients with a higher probability for readmission while steady administration of insulin, number of medications prescribed, number of diagonosis procedures tend to prevention from readmission for those patients. Therefore, several suggestions based on those covariates can be made to improve the hospital performance in order to avoid readmission of patients due to diabetes. For example, hospitals should provide their patients with sufficient procedures, especailly for elders and those patients with injury and circulatory primary diagnosis. And a steady dose of insulin should be prescribes for patients with diabetes. In addition, hospitals may need to take more care of those patients with multiple times of inpatient visits even emergence visits. Given this result may be helpful to improve the hospital performance to avoid readmission, further research should be conducted and improved techniques are required to better predict the true occurrence of readmission of diabetes patients.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

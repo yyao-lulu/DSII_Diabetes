@@ -1,13 +1,12 @@
 ---
-title: "Data Science II Final Project"
+title: "Study on Key Factors that Affect Diabetes Patient Readmission"
 author: "Yangwei Yan (yy2828), Yunqiu Yao (yy2827), Boxuan Li (bl2689)"
 date: "4/18/2018"
-output: 
-  html_document:
-    code_folding: hide
+output: pdf_document
 ---
 
-In real life, it is very important to know if a patient will be readmitted in some hospital due to some particular diseases. It is not only because readmission indicates that the patient needs to suffer more from the disease, also a potential reminder that the treatment previously used to treat those patients is not effective enough. Generally, readmission should be avoided thus exploring the way to prevent readmission becomes a concern. And it is the major motivation for this study. In this case, a dataset about the readmission status of patients with diabetes extracted from the hospital records, including information on the patient's demographic characteristics, the diagnosis and treatment, is analyzed to explore the impact of those features on the incidence of readmission in the population. This report includes the data description, exploratory study and supervised analysis, which serve to provide a sense of the data and relationship among variables in whole. The result shows that there is assication between serveral covatiates and the readmission occurrence, e.g., (!!!!!!!!!!!!!!!!!). 
+In real life, it is very important to know if a patient will be readmitted in some hospital due to some particular diseases. It is not only because readmission indicates that the patient needs to suffer more from the disease, also a potential reminder that the treatment previously used to treat those patients is not effective enough. Generally, readmission should be avoided thus exploring the way to prevent readmission becomes a concern. And it is the major motivation for this study. In this case, a dataset about the readmission status of patients with diabetes extracted from the hospital records, including information on the patient's demographic characteristics, the diagnosis and treatment, is analyzed to explore the impact of those features on the incidence of readmission in the population. This report includes the data description, exploratory study and supervised analysis, which serve to provide a sense of the data and relationship among variables in whole. The result shows that there is assication between serveral covatiates and the readmission occurrence, e.g., age, number of medications prescribed, etc.
+
 
 ```{r R set-up, include=FALSE}
 knitr::opts_chunk$set(
