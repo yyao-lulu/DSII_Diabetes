@@ -12,7 +12,7 @@
 <meta name="author" content="Yangwei Yan (yy2828), Yunqiu Yao (yy2827), Boxuan Li (bl2689)" />
 
 
-<title>Data Science 2 Final Project</title>
+<title>Data Science II Final Project</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -221,7 +221,7 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Data Science 2 Final Project</h1>
+<h1 class="title toc-ignore">Data Science II Final Project</h1>
 <h4 class="author"><em>Yangwei Yan (yy2828), Yunqiu Yao (yy2827), Boxuan Li (bl2689)</em></h4>
 <h4 class="date"><em>4/18/2018</em></h4>
 
@@ -293,12 +293,12 @@ diabetes_tidy = diabetes_tidy %&gt;%
 <div id="data-description" class="section level2">
 <h2>Data Description</h2>
 <p>The dataset used in this study was extracted from the Health Facts database (Cerner Corporation, Kansas City, MO), a national data warehouse that collects comprehensive clinical records across hospitals throughout the United States. Information in the dataset was systematically collected from participating institutions electronic medical records. In this case, we focus on the records on “diabetic” encounters. The dataset contains 67069 observations and 47 variables before data cleaning. Specifically, it incorporates basic information on each “diabetic” encounter for patients, including several demographic characteristics (i.e., “race”, “gender” and “age”), hospital records about diagnosis, medical treatments, and th readmission status for each patient. Most of variables in the dataset are categorical, with two or three categories (e.g., “Yes”, “No”, “Steady”, etc.), indicating whether the patient received some treatments or had some particular features. Information in this dataset can be helpful to evaluate the efficacy of different treatments to reduce the readmission rate of patients due to diabetes. Therefore, the “readmitted” variable is regarded as the main response in the supervised analysis section, which will aim to explore the impact of different treatments to the readmission due to diaebtes. Result of this research is promising to provide some insights in improvement of the diabetes treatment.</p>
-<p>During the data cleaning process, we omitted the variables with too many missing values with the proportion of missing values over 50%, i.e., ‘weight’, ‘payer code’ and ‘medical specialty’. Subsequently, few missing values left in other variables were omiited as well. Data in the original dataset are considered to be correlated because it contained multiple visits per patients. Thus we used only the first encounter for each patient as the primary admission status. In addtion, we combined “No” and “&gt;30” categories in the “readmitted” variable into “&gt;30” category because it has been verified by research that it is more likely for a patient to readmit after 30 days due to his or her own healthy issues instead of the treatment. Therefore, only readmission within 30 days after discharge was considered to be associated with the treatment in this case, which is why three categories were combined into two indicating readmission related to treatment and readmission irrelevant to treatment respectively. In terms of those numeric variables referring to categorical meanings such as “diag_1”, “diag_2”, “diag_3” and “discharge”, we substituted them with the original implications as factors. Futhermore, multiple variables were found to give extremely separate categories, i.e., the ratio of two categories is less than 0.1%, thus they were also removed and will not be considered in further analyses. Simultaneously, considering the overwhelming data that could cause difficulty in techinics used in supervised analysis, we decided to appropriately reduce the size to 20000 observations randomly. After the process of data cleaning, the dataset still contains 67069 observations and 32 variables.</p>
+<p>During the data cleaning process, we omitted the variables with too many missing values with the proportion of missing values over 30%, i.e., ‘weight’, ‘payer code’ and ‘medical specialty’. Subsequently, few missing values left in other variables were omiited as well. Data in the original dataset are considered to be correlated because it contained multiple visits per patients. Thus we used only the first encounter for each patient as the primary admission status. In addtion, we combined “No” and “&gt;30” categories in the “readmitted” variable into “&gt;30” category because it has been verified by research that it is more likely for a patient to readmit after 30 days due to his or her own healthy issues instead of the treatment. Therefore, only readmission within 30 days after discharge was considered to be associated with the treatment in this case, which is why three categories were combined into two indicating readmission related to treatment and readmission irrelevant to treatment respectively. In terms of those numeric variables referring to categorical meanings such as “diag_1”, “diag_2”, “diag_3” and “discharge”, we substituted them with the original implications as factors. Futhermore, multiple variables were found to give extremely separate categories, i.e., the ratio of two categories is less than 0.1%, thus they were also removed and will not be considered in further analyses. Simultaneously, considering the overwhelming data that could cause difficulty in techinics used in supervised analysis, we decided to appropriately reduce the size to 20000 observations randomly. After the process of data cleaning, the dataset still contains 67069 observations and 32 variables.</p>
 <p>More detailed information can be found in <a href="ref:">here</a>.</p>
 </div>
 <div id="explanatory-data-analysis" class="section level2">
 <h2>Explanatory Data Analysis</h2>
-<pre class="r"><code># For numeric variables
+<pre class="r"><code># summary table for numeric variables
 diabetes_tidy %&gt;% 
   select_if(is.integer) %&gt;% 
   apply(2,summary) %&gt;% 
@@ -459,7 +459,7 @@ diabetes_tidy %&gt;%
 </tr>
 </tbody>
 </table>
-<pre class="r"><code># For categorical variables
+<pre class="r"><code># summary table for categorical variables
 freq.table = function(x,name){
   table = data.frame(x)
   names(table) = c(&quot;Value&quot;,&quot;Count&quot;)
@@ -1098,10 +1098,40 @@ do.call(rbind,lapply(seq_along(fct_diabetes),function(i) freq.table(fct_diabetes
 </tr>
 </tbody>
 </table>
+<pre class="r"><code># visualize the associations
+# readmitted and age
+age = diabetes_tidy %&gt;%
+  group_by(age) %&gt;% 
+  summarise(count_yes = sum(readmitted == &quot;Yes&quot;),
+            count_no = sum(readmitted == &quot;No&quot;),
+            proportion = count_yes/(count_yes + count_no))
+
+ggplot(age, aes(age, proportion, group = 1)) + 
+  geom_point() +
+  geom_line() +
+  labs(title = &quot;The Association Between Readmitted Distribution and Age&quot;,
+       x = &quot;Age&quot;,
+       y = &quot;Readmitted Proportion&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" width="90%" /></p>
+<pre class="r"><code># readmitted and primary diagnosis
+disease = diabetes_tidy %&gt;%
+  group_by(diag_1) %&gt;% 
+  summarise(count_yes = sum(readmitted == &quot;Yes&quot;),
+            count_no = sum(readmitted == &quot;No&quot;),
+            proportion = count_yes/(count_yes + count_no))
+
+overall_prop = sum(disease$count_yes)/(sum(disease$count_yes) + sum(disease$count_no))
+ggplot(disease, aes(proportion, diag_1)) +
+  geom_point() +
+  geom_vline(xintercept = overall_prop, color = &quot;red&quot;) + 
+  labs(title = &quot;The Association Between Readmitted Distribution and Diagnosed Disease&quot;,
+       x = &quot;Readmitted Proportion&quot;,
+       y = &quot;Primary Diagnosis&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-1-2.png" width="90%" /></p>
 <pre class="r"><code>set.seed(100)
 rsample = sample(1:nrow(diabetes_tidy), 20000)
 diabetes_tidy = diabetes_tidy[rsample, ]</code></pre>
-<p>The summary and the table presents an basic but comprehensive overview of the dataset, including the class of each variable, the proportion in the population for categorical variables and the related statitics for numeric variables. Based on the table, (!!!!!!).</p>
+<p>The summary and the table presents an basic but comprehensive overview of the dataset, including the class of each variable, the proportion in the population for categorical variables and the related statitics for numeric variables. Based on the table, it can be found that there are 8 continuous and 24 categorical variables after data cleaning. Most patients are caucasian. Remarkably, older people seem to have higher risk for diabetes since the age of patients mostly falls around 70. The mean number of medications prescribed for those patients is about 16, among which insulin is still the major treatment medication since over 50% patients take insulin while the proportion of patients who take other medication is so small. Concerning the response “readmitted”, only 10% of all patients studied in this case readmit within 30 days after previous discharge. Even though it is a minor fraction, it is still essential to study how to improve the treatment to avoid readmission.</p>
 </div>
 <div id="supervised-analysis" class="section level2">
 <h2>Supervised Analysis</h2>
@@ -1109,9 +1139,6 @@ diabetes_tidy = diabetes_tidy[rsample, ]</code></pre>
 <pre class="r"><code># create test set
 set.seed(1)
 nrow_train = sample(1:nrow(diabetes_tidy), 10000)</code></pre>
-<div id="logistic-model" class="section level4">
-<h4>Logistic Model</h4>
-</div>
 <div id="k-nearest-neighbor-knn-classifiers" class="section level4">
 <h4>K-nearest neighbor (KNN) classifiers</h4>
 <p>K-nearest neighbor (KNN) classifiers is one of the model-free classification methods. KNN requires no assumption on the distrbution that generate the data. Thus we applied KNN in our dataset with large amounts of predictors. Since KNN measures the nearest distance between training points and the point <span class="math inline">\(x_0\)</span> to predict, it is impossible to evaluate the distance if the predictor <span class="math inline">\(x_i\)</span> is categorical. For example, it is not rationale to measure the distance between <span class="math inline">\(x_0\)</span> and “female” or <span class="math inline">\(x_0\)</span> and “male”. Therefore, we only included numerical predictors to construct the KNN model.</p>
@@ -1122,33 +1149,32 @@ test = diabetes_tidy[-nrow_train, c(4:10, 14)]
 
 # perform KNN
 set.seed(1)
-library(class)
-fit_knn = knn(train, test, cl = readmit, k = 10)
-library(caret)
-confusionMatrix(fit_knn, diabetes_tidy[-nrow_train,]$readmitted)</code></pre>
+pred_knn_prob = 1-attributes(knn(train, test, prob=TRUE,cl = readmit, k = 10))$prob
+pred_knn = knn(train, test, cl = readmit, k = 10)
+cm.knn = confusionMatrix(pred_knn, diabetes_tidy[-nrow_train,]$readmitted); cm.knn</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction   No  Yes
-##        No  9036  958
-##        Yes    4    2
+##        No  9034  958
+##        Yes    6    2
 ##                                           
-##                Accuracy : 0.9038          
-##                  95% CI : (0.8979, 0.9095)
+##                Accuracy : 0.9036          
+##                  95% CI : (0.8976, 0.9093)
 ##     No Information Rate : 0.904           
-##     P-Value [Acc &gt; NIR] : 0.5356          
+##     P-Value [Acc &gt; NIR] : 0.5625          
 ##                                           
-##                   Kappa : 0.003           
+##                   Kappa : 0.0025          
 ##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
 ##                                           
-##             Sensitivity : 0.999558        
+##             Sensitivity : 0.999336        
 ##             Specificity : 0.002083        
-##          Pos Pred Value : 0.904142        
-##          Neg Pred Value : 0.333333        
+##          Pos Pred Value : 0.904123        
+##          Neg Pred Value : 0.250000        
 ##              Prevalence : 0.904000        
-##          Detection Rate : 0.903600        
-##    Detection Prevalence : 0.999400        
-##       Balanced Accuracy : 0.500820        
+##          Detection Rate : 0.903400        
+##    Detection Prevalence : 0.999200        
+##       Balanced Accuracy : 0.500710        
 ##                                           
 ##        &#39;Positive&#39; Class : No              
 ## </code></pre>
@@ -1157,13 +1183,16 @@ confusionMatrix(fit_knn, diabetes_tidy[-nrow_train,]$readmitted)</code></pre>
 <h4>Classification Tree</h4>
 <p>We fitted a classification tree to the training data and used cross-validation on the training set to determine the optimal tree size by chosing the optimal parameter cp.</p>
 <pre class="r"><code>set.seed(1)
-fit_tree = train(diabetes_tidy[-30], diabetes_tidy$readmitted, 
-                   method = &quot;rpart&quot;,
-                   trControl = trainControl(method = &quot;cv&quot;, number = 10))
+train_tree = diabetes_tidy[nrow_train,]
+fit_tree = train(train_tree[,-30],
+                 train_tree$readmitted,
+                 method = &quot;rpart&quot;,
+                 trControl = trainControl(method = &quot;cv&quot;, number = 10))
 plot(fit_tree)</code></pre>
 <p><img src="index_files/figure-html/classification%20tree-1.png" width="90%" /></p>
-<pre class="r"><code>pred_tree = predict(fit_tree, newdata = diabetes_tidy[-nrow_train,])
-confusionMatrix(pred_tree, diabetes_tidy[-nrow_train,]$readmitted)</code></pre>
+<pre class="r"><code>pred_tree_prob = predict(fit_tree, newdata = diabetes_tidy[-nrow_train,],type=&quot;prob&quot;)
+pred_tree = predict(fit_tree, newdata = diabetes_tidy[-nrow_train,])
+cm.tree = confusionMatrix(pred_tree, diabetes_tidy[-nrow_train,]$readmitted); cm.tree</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
@@ -1193,9 +1222,9 @@ confusionMatrix(pred_tree, diabetes_tidy[-nrow_train,]$readmitted)</code></pre>
 </div>
 <div id="random-forest" class="section level4">
 <h4>Random Forest</h4>
+<p>Random forest technique was also used in this case. This method can not only predict the class of each observation in the test set, also measure the importance of variables during the fitting process. The number of variables randomly sampled as candidates at each split in this study was selected as the squre root of number of covariates used to fit the model, i.e., <span class="math inline">\(\sqrt{32-1}\approx6\)</span>.</p>
 <pre class="r"><code>set.seed(1)
 library(randomForest)
-library(caret)
 
 diabetes_rf &lt;- mutate(diabetes_tidy, readmitted = ifelse(readmitted ==&#39;Yes&#39;, 1,0)) %&gt;%
   ungroup()
@@ -1238,7 +1267,7 @@ importance(fit_rf)</code></pre>
 pred_rf = rep(&quot;No&quot;,length(pred_rf_prob))
 pred_rf[pred_rf_prob&gt;=0.3] = &quot;Yes&quot;
 pred_rf = as.factor(pred_rf)
-confusionMatrix(pred_rf, diabetes_tidy[-nrow_train,]$readmitted)</code></pre>
+cm.rf = confusionMatrix(pred_rf, diabetes_tidy[-nrow_train,]$readmitted); cm.rf</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
@@ -1265,23 +1294,21 @@ confusionMatrix(pred_rf, diabetes_tidy[-nrow_train,]$readmitted)</code></pre>
 ##                                           
 ##        &#39;Positive&#39; Class : No              
 ## </code></pre>
+<p>The plot of “%IncMSE” and “IncNodePurity” presents the impact of each variable on the change of MSE and node purity in each split during the model fitting. %IncMSE is the most robust and informative measure. It is the increase in mse of predictions(estimated with out-of-bag-CV) as a result of variable j being permuted(values randomly shuffled). And the IncNodePurity relates to the loss function which by best splits are chosen. The larger the two values are, the more important the variable is. Hence, both plots indicate that several variables, e.g., “num_medication”, “time_in_hospital”, “number_lab_procedures”,etc., are the most important to accurately predict the response “readmitted”.</p>
+<p>After predicting the response in test set, we compared the predicted ones with the true reponse and made the confusion matrix. The test error rate is therefore <span class="math inline">\((1-0.9014)*100%=9.99%\)</span>.</p>
 </div>
 <div id="support-vector-machines" class="section level4">
 <h4>Support Vector Machines</h4>
 <pre class="r"><code>library(e1071)
-library(caret)
 
 # model construction
-svm.model = svm(readmitted~.,data=diabetes_tidy[nrow_train,],type=&quot;C-classification&quot;,cost=10,gamma=0.01)
+svm.model = svm(readmitted~.,data=diabetes_tidy[nrow_train,],probability=TRUE,type=&quot;C-classification&quot;,cost=10,gamma=0.01)
 
-# training error
-# svm.pred = predict(svm.model,newdata=diabetes_tidy[-nrow_test,])
-# confusionMatrix(svm.pred,diabetes_tidy[nrow_sample,]$readmitted)
+pred_svm_prob = attributes(predict(svm.model,newdata=diabetes_tidy[-nrow_train,],probability=TRUE))$probabilities
 
-# test error
-svm.pred.test = predict(svm.model,newdata=diabetes_tidy[-nrow_train,])
+pred_svm = predict(svm.model,newdata=diabetes_tidy[-nrow_train,])
 
-confusionMatrix(svm.pred.test,diabetes_tidy[-nrow_train,]$readmitted)</code></pre>
+cm.svm = confusionMatrix(pred_svm,diabetes_tidy[-nrow_train,]$readmitted); cm.svm</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
@@ -1308,15 +1335,16 @@ confusionMatrix(svm.pred.test,diabetes_tidy[-nrow_train,]$readmitted)</code></pr
 ##                                           
 ##        &#39;Positive&#39; Class : No              
 ## </code></pre>
+<p>Here we tried to use support vector machine to perform the classification. In order to capture the potential nonlinearities in the support-vector classifiers and to obtain better prediction, we use the radial kernel for svm. The result shows that we have a low overall error rate (9.62%) for the prediction. The sensitivity is extremely high, with a value 99.96%, while the specificity is very low, which is only 0.21%. This means the svm model performs quite well on identifing those who do not need to be readmitted (true negative), but has poor ability on the identification of those who require readmission (true positive).</p>
 </div>
 <div id="logistic-regression" class="section level4">
 <h4>Logistic Regression</h4>
-<pre class="r"><code>logit.fit = glm(readmitted~.,data=diabetes_tidy,subset=nrow_train,family=&quot;binomial&quot;)
+<pre class="r"><code>log.fit = glm(readmitted~.,data=diabetes_tidy,subset=nrow_train,family=&quot;binomial&quot;)
 # contrasts(diabetes_tidy$readmitted)
-logit.pred.prob = predict(logit.fit,newdata=diabetes_tidy[-nrow_train,],type=&quot;response&quot;)
-logit.pred = rep(&quot;No&quot;,length(logit.pred.prob))
-logit.pred[logit.pred.prob&gt;=0.3] = &quot;Yes&quot;
-confusionMatrix(logit.pred,diabetes_tidy[-nrow_train,]$readmitted)</code></pre>
+pred.log.prob = predict(log.fit,newdata=diabetes_tidy[-nrow_train,],type=&quot;response&quot;)
+pred_log = rep(&quot;No&quot;,length(pred.log.prob))
+pred_log[pred.log.prob&gt;=0.3] = &quot;Yes&quot;
+cm.log = confusionMatrix(pred_log,diabetes_tidy[-nrow_train,]$readmitted); cm.log</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
@@ -1343,6 +1371,91 @@ confusionMatrix(logit.pred,diabetes_tidy[-nrow_train,]$readmitted)</code></pre>
 ##                                           
 ##        &#39;Positive&#39; Class : No              
 ## </code></pre>
+<p>Logistic regression is also a common way to address the classification problems. It can be seen from the table above that the overall error of the logistic model for presiction is very low, at around 10%. But similar to the SVM model, the logistic model also has a high sensitivity but a low specificity. Therefore, the model is also more suitable for the identification of those who are not necessarily to be re-admitted.</p>
+<pre class="r"><code># roc curves
+library(pROC)
+roc.knn = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_knn_prob,levels=c(&quot;No&quot;,&quot;Yes&quot;))
+auc.knn = roc.knn$auc
+roc.tree = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_tree_prob[,2],levels=c(&quot;No&quot;,&quot;Yes&quot;))
+auc.tree = roc.tree$auc
+roc.rf = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_rf_prob,levels=c(&quot;No&quot;,&quot;Yes&quot;))
+auc.rf = roc.rf$auc
+roc.svm = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_svm_prob[,2],levels=c(&quot;No&quot;,&quot;Yes&quot;))
+auc.svm = roc.svm$auc
+roc.log = roc(diabetes_tidy[-nrow_train,]$readmitted,pred.log.prob,levels=c(&quot;No&quot;,&quot;Yes&quot;))
+auc.log = roc.log$auc
+
+# roc plot
+plot(roc.knn,legacy.axes=TRUE,col=&quot;red&quot;)
+plot(roc.tree,add=TRUE,col=&quot;orange&quot;)
+plot(roc.rf,add=TRUE,col=&quot;maroon&quot;)
+plot(roc.svm,add=TRUE,col=&quot;yellow&quot;)
+plot(roc.log,add=TRUE,col=&quot;brown&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
+<pre class="r"><code># summary table
+method = c(&quot;KNN&quot;,&quot;Classification Tree&quot;,&quot;Random Forest&quot;,&quot;SVM&quot;,&quot;Logistic&quot;)
+auc = round(c(auc.knn,auc.tree,auc.rf,auc.svm,auc.log),3)
+error = round(1-c(cm.knn$overall[[1]],cm.tree$overall[[1]],cm.rf$overall[[1]],cm.svm$overall[[1]],cm.log$overall[[1]]),5)
+sens = round(c(cm.knn$byClass[[1]],cm.tree$byClass[[1]],cm.rf$byClass[[1]],cm.svm$byClass[[1]],cm.log$byClass[[1]]),6)
+spec = round(c(cm.knn$byClass[[2]],cm.tree$byClass[[2]],cm.rf$byClass[[2]],cm.svm$byClass[[2]],cm.log$byClass[[2]]),6)
+comp = cbind(method,auc,error,sens,spec)
+colnames(comp) = c(&quot;Method&quot;,&quot;AUC&quot;,&quot;Error Rate&quot;,&quot;Sensitivity&quot;,&quot;Specificity&quot;)
+pander::pander(comp)</code></pre>
+<table style="width:99%;">
+<colgroup>
+<col width="30%" />
+<col width="11%" />
+<col width="18%" />
+<col width="19%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Method</th>
+<th align="center">AUC</th>
+<th align="center">Error Rate</th>
+<th align="center">Sensitivity</th>
+<th align="center">Specificity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">KNN</td>
+<td align="center">0.532</td>
+<td align="center">0.0964</td>
+<td align="center">0.999336</td>
+<td align="center">0.002083</td>
+</tr>
+<tr class="even">
+<td align="center">Classification Tree</td>
+<td align="center">0.5</td>
+<td align="center">0.096</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">Random Forest</td>
+<td align="center">0.584</td>
+<td align="center">0.0986</td>
+<td align="center">0.995796</td>
+<td align="center">0.0125</td>
+</tr>
+<tr class="even">
+<td align="center">SVM</td>
+<td align="center">0.524</td>
+<td align="center">0.0962</td>
+<td align="center">0.999558</td>
+<td align="center">0.002083</td>
+</tr>
+<tr class="odd">
+<td align="center">Logistic</td>
+<td align="center">0.62</td>
+<td align="center">0.0984</td>
+<td align="center">0.995796</td>
+<td align="center">0.014583</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 

@@ -1,5 +1,5 @@
 ---
-title: "Data Science 2 Final Project"
+title: "Data Science II Final Project"
 author: "Yangwei Yan (yy2828), Yunqiu Yao (yy2827), Boxuan Li (bl2689)"
 date: "4/18/2018"
 output: 
@@ -172,8 +172,6 @@ set.seed(1)
 nrow_train = sample(1:nrow(diabetes_tidy), 10000)
 ```
 
-#### Logistic Model
-
 #### K-nearest neighbor (KNN) classifiers
 K-nearest neighbor (KNN) classifiers is one of the model-free classification methods. KNN requires no assumption on the distrbution that generate the data. Thus we applied KNN in our dataset with large amounts of predictors. Since KNN measures the nearest distance between training points and the point $x_0$ to predict, it is impossible to evaluate the distance if the predictor $x_i$ is categorical. For example, it is not rationale to measure the distance between $x_0$ and "female" or $x_0$ and "male". Therefore, we only included numerical predictors to construct the KNN model.
 
@@ -185,8 +183,9 @@ test = diabetes_tidy[-nrow_train, c(4:10, 14)]
 
 # perform KNN
 set.seed(1)
-fit_knn = knn(train, test, cl = readmit, k = 10)
-confusionMatrix(fit_knn, diabetes_tidy[-nrow_train,]$readmitted)
+pred_knn_prob = 1-attributes(knn(train, test, prob=TRUE,cl = readmit, k = 10))$prob
+pred_knn = knn(train, test, cl = readmit, k = 10)
+cm.knn = confusionMatrix(pred_knn, diabetes_tidy[-nrow_train,]$readmitted); cm.knn
 ```
 
 #### Classification Tree
@@ -199,8 +198,9 @@ fit_tree = train(train_tree[,-30],
                  method = "rpart",
                  trControl = trainControl(method = "cv", number = 10))
 plot(fit_tree)
+pred_tree_prob = predict(fit_tree, newdata = diabetes_tidy[-nrow_train,],type="prob")
 pred_tree = predict(fit_tree, newdata = diabetes_tidy[-nrow_train,])
-confusionMatrix(pred_tree, diabetes_tidy[-nrow_train,]$readmitted)
+cm.tree = confusionMatrix(pred_tree, diabetes_tidy[-nrow_train,]$readmitted); cm.tree
 ```
 
 #### Random Forest
@@ -220,7 +220,7 @@ pred_rf_prob = predict(fit_rf, newdata=diabetes_tidy[-nrow_train,],type="respons
 pred_rf = rep("No",length(pred_rf_prob))
 pred_rf[pred_rf_prob>=0.3] = "Yes"
 pred_rf = as.factor(pred_rf)
-confusionMatrix(pred_rf, diabetes_tidy[-nrow_train,]$readmitted)
+cm.rf = confusionMatrix(pred_rf, diabetes_tidy[-nrow_train,]$readmitted); cm.rf
 ```
 
 The plot of "%IncMSE" and "IncNodePurity" presents the impact of each variable on the change of MSE and node purity in each split during the model fitting. %IncMSE is the most robust and informative measure. It is the increase in mse of predictions(estimated with out-of-bag-CV) as a result of variable j being permuted(values randomly shuffled). And the IncNodePurity relates to the loss function which by best splits are chosen. The larger the two values are, the more important the variable is. Hence, both plots indicate that several variables, e.g., "num_medication", "time_in_hospital", "number_lab_procedures",etc., are the most important to accurately predict the response "readmitted". 
@@ -233,26 +233,58 @@ After predicting the response in test set, we compared the predicted ones with t
 library(e1071)
 
 # model construction
-svm.model = svm(readmitted~.,data=diabetes_tidy[nrow_train,],type="C-classification",cost=10,gamma=0.01)
+svm.model = svm(readmitted~.,data=diabetes_tidy[nrow_train,],probability=TRUE,type="C-classification",cost=10,gamma=0.01)
 
-# training error
-# svm.pred = predict(svm.model,newdata=diabetes_tidy[-nrow_test,])
-# confusionMatrix(svm.pred,diabetes_tidy[nrow_sample,]$readmitted)
+pred_svm_prob = attributes(predict(svm.model,newdata=diabetes_tidy[-nrow_train,],probability=TRUE))$probabilities
 
-# test error
-svm.pred.test = predict(svm.model,newdata=diabetes_tidy[-nrow_train,])
+pred_svm = predict(svm.model,newdata=diabetes_tidy[-nrow_train,])
 
-confusionMatrix(svm.pred.test,diabetes_tidy[-nrow_train,]$readmitted)
+cm.svm = confusionMatrix(pred_svm,diabetes_tidy[-nrow_train,]$readmitted); cm.svm
 
 ```
+Here we tried to use support vector machine to perform the classification. In order to capture the potential nonlinearities in the support-vector classifiers and to obtain better prediction, we use the radial kernel for svm. The result shows that we have a low overall error rate (9.62%) for the prediction. The sensitivity is extremely high, with a value 99.96%, while the specificity is very low, which is only 0.21%. This means the svm model performs quite well on identifing those who do not need to be readmitted (true negative), but has poor ability on the identification of those who require readmission (true positive).
 
 #### Logistic Regression
 ```{r logistic}
-logit.fit = glm(readmitted~.,data=diabetes_tidy,subset=nrow_train,family="binomial")
+log.fit = glm(readmitted~.,data=diabetes_tidy,subset=nrow_train,family="binomial")
 # contrasts(diabetes_tidy$readmitted)
-logit.pred.prob = predict(logit.fit,newdata=diabetes_tidy[-nrow_train,],type="response")
-logit.pred = rep("No",length(logit.pred.prob))
-logit.pred[logit.pred.prob>=0.3] = "Yes"
-confusionMatrix(logit.pred,diabetes_tidy[-nrow_train,]$readmitted)
+pred.log.prob = predict(log.fit,newdata=diabetes_tidy[-nrow_train,],type="response")
+pred_log = rep("No",length(pred.log.prob))
+pred_log[pred.log.prob>=0.3] = "Yes"
+cm.log = confusionMatrix(pred_log,diabetes_tidy[-nrow_train,]$readmitted); cm.log
+```
+Logistic regression is also a common way to address the classification problems. It can be seen from the table above that the overall error of the logistic model for presiction is very low, at around 10%. But similar to the SVM model, the logistic model also has a high sensitivity but a low specificity. Therefore, the model is also more suitable for the identification of those who are not necessarily to be re-admitted. 
+
+```{r}
+# roc curves
+library(pROC)
+roc.knn = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_knn_prob,levels=c("No","Yes"))
+auc.knn = roc.knn$auc
+roc.tree = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_tree_prob[,2],levels=c("No","Yes"))
+auc.tree = roc.tree$auc
+roc.rf = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_rf_prob,levels=c("No","Yes"))
+auc.rf = roc.rf$auc
+roc.svm = roc(diabetes_tidy[-nrow_train,]$readmitted,pred_svm_prob[,2],levels=c("No","Yes"))
+auc.svm = roc.svm$auc
+roc.log = roc(diabetes_tidy[-nrow_train,]$readmitted,pred.log.prob,levels=c("No","Yes"))
+auc.log = roc.log$auc
+
+# roc plot
+plot(roc.knn,legacy.axes=TRUE,col="red")
+plot(roc.tree,add=TRUE,col="orange")
+plot(roc.rf,add=TRUE,col="maroon")
+plot(roc.svm,add=TRUE,col="yellow")
+plot(roc.log,add=TRUE,col="brown")
+
+# summary table
+method = c("KNN","Classification Tree","Random Forest","SVM","Logistic")
+auc = round(c(auc.knn,auc.tree,auc.rf,auc.svm,auc.log),3)
+error = round(1-c(cm.knn$overall[[1]],cm.tree$overall[[1]],cm.rf$overall[[1]],cm.svm$overall[[1]],cm.log$overall[[1]]),5)
+sens = round(c(cm.knn$byClass[[1]],cm.tree$byClass[[1]],cm.rf$byClass[[1]],cm.svm$byClass[[1]],cm.log$byClass[[1]]),6)
+spec = round(c(cm.knn$byClass[[2]],cm.tree$byClass[[2]],cm.rf$byClass[[2]],cm.svm$byClass[[2]],cm.log$byClass[[2]]),6)
+comp = cbind(method,auc,error,sens,spec)
+colnames(comp) = c("Method","AUC","Error Rate","Sensitivity","Specificity")
+pander::pander(comp)
+
 ```
 
